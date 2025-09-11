@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grupo de Oração Nossa Senhora das Graças - Controle Financeiro</title>
+    <meta name="description" content="Sistema de controle financeiro para o Grupo de Oração Nossa Senhora das Graças">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Reset e base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, hsl(0 0% 98%), hsl(0 0% 96%));
+            color: hsl(0 0% 15%);
+            min-height: 100vh;
+        }
+
+        .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Layout principal */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid hsl(0 0% 90%);
+            box-shadow: 0 4px 20px -4px hsl(0 0% 0% / 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar-toggle {
+            padding: 8px;
+            margin: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            align-self: flex-end;
+        }
+
+        .sidebar-toggle:hover {
+            background: hsl(0 0% 95%);
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid hsl(0 0% 90%);
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-brand:hover {
+            background: hsl(0 0% 95%);
+        }
+
+        .sidebar-brand.active {
+            background: linear-gradient(135deg, hsl(0 0% 8%), hsl(0 0% 15%));
+            color: white;
+            box-shadow: 0 10px 40px -10px hsl(0 0% 0% / 0.3);
+        }
+
+        .sidebar-brand-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand-text {
+            text-align: left;
+        }
+
+        .sidebar-brand-title {
+            font-weight: 600;
+            font-size: 14px;
+            line-height: 1.2;
+        }
+
+        .sidebar-brand-subtitle {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .sidebar-menu {
+            padding: 24px 0;
+        }
+
+        .sidebar-menu-label {
+            padding: 0 16px;
+            color: hsl(0 0% 45%);
+            font-weight: 500;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+
+        .sidebar-menu-list {
+            list-style: none;
+            padding: 0 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-menu-item {
+            display: block;
+        }
+
+        .sidebar-menu-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .sidebar-menu-link:hover {
+            background: hsl(0 0% 95%);
+            box-shadow: 0 4px 20px -4px hsl(0 0% 0% / 0.08);
+        }
+
+        .sidebar-menu-link.active {
+            background: linear-gradient(135deg, hsl(0 0% 8%), hsl(0 0% 15%));
+            color: white;
+            box-shadow: 0 10px 40px -10px hsl(0 0% 0% / 0.3);
+        }
+
+        .sidebar-menu-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .collapsed .sidebar-brand-text,
+        .collapsed .sidebar-menu-label,
+        .collapsed .sidebar-menu-text {
+            display: none;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .main-header {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid hsl(0 0% 90%);
+        }
+
+        .main-header-content {
+            display: flex;
+            height: 56px;
+            align-items: center;
+            padding: 0 16px;
+        }
+
+        .mobile-sidebar-toggle {
+            display: none;
+            padding: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-sidebar-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                z-index: 50;
+                height: 100vh;
+            }
+            
+            .sidebar.open {
+                left: 0;
+            }
+        }
+
+        /* Content sections */
+        .content-section {
+            display: none;
+            padding: 24px;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid hsl(0 0% 90%);
+            box-shadow: 0 4px 20px -4px hsl(0 0% 0% / 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 32px -8px hsl(0 0% 0% / 0.15);
+        }
+
+        .card-header {
+            padding: 20px 24px 12px;
+            border-bottom: 1px solid hsl(0 0% 95%);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: hsl(0 0% 45%);
+            margin: 4px 0 0;
+        }
+
+        .card-content {
+            padding: 20px 24px;
+        }
+
+        /* Gradientes especiais */
+        .gradient-dark {
+            background: linear-gradient(135deg, hsl(0 0% 8%), hsl(0 0% 15%));
+            color: white;
+            box-shadow: 0 10px 40px -10px hsl(0 0% 0% / 0.3);
+        }
+
+        .gradient-gray {
+            background: linear-gradient(135deg, hsl(0 0% 25%), hsl(0 0% 35%));
+            color: white;
+            box-shadow: 0 8px 32px -8px hsl(0 0% 0% / 0.15);
+        }
+
+        /* Grids */
+        .grid {
+            display: grid;
+            gap: 24px;
+        }
+
+        .grid-1 { grid-template-columns: 1fr; }
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-4 { grid-template-columns: repeat(4, 1fr); }
+        .grid-5 { grid-template-columns: repeat(5, 1fr); }
+
+        @media (max-width: 1024px) {
+            .grid-4, .grid-5 { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr; }
+        }
+
+        /* Forms */
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            font-size: 14px;
+            color: hsl(0 0% 15%);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: 10px 12px;
+            border: 1px solid hsl(0 0% 90%);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: hsl(0 0% 15%);
+            box-shadow: 0 0 0 1px hsl(0 0% 15%);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, hsl(0 0% 8%), hsl(0 0% 15%));
+            color: white;
+            box-shadow: 0 10px 40px -10px hsl(0 0% 0% / 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 15px 50px -10px hsl(0 0% 0% / 0.4);
+        }
+
+        .btn-secondary {
+            background: hsl(0 0% 95%);
+            color: hsl(0 0% 15%);
+        }
+
+        .btn-secondary:hover {
+            background: hsl(0 0% 90%);
+        }
+
+        .btn-danger {
+            background: hsl(0 84.2% 60.2%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: hsl(0 84.2% 55%);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* Tables */
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid hsl(0 0% 90%);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid hsl(0 0% 95%);
+        }
+
+        .table th {
+            background: hsl(0 0% 98%);
+            font-weight: 600;
+            font-size: 14px;
+            color: hsl(0 0% 45%);
+        }
+
+        .table td {
+            font-size: 14px;
+        }
+
+        .table tbody tr:hover {
+            background: hsl(0 0% 98%);
+        }
+
+        /* Utility classes */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-lg { font-size: 18px; }
+        .text-xl { font-size: 20px; }
+        .text-2xl { font-size: 24px; }
+        .text-3xl { font-size: 30px; }
+        .text-4xl { font-size: 36px; }
+        .font-bold { font-weight: 700; }
+        .font-semibold { font-weight: 600; }
+        .font-medium { font-weight: 500; }
+        .mb-2 { margin-bottom: 8px; }
+        .mb-4 { margin-bottom: 16px; }
+        .mb-6 { margin-bottom: 24px; }
+        .mb-8 { margin-bottom: 32px; }
+        .mt-1 { margin-top: 4px; }
+        .mt-2 { margin-top: 8px; }
+        .mt-4 { margin-top: 16px; }
+        .p-2 { padding: 8px; }
+        .p-3 { padding: 12px; }
+        .p-4 { padding: 16px; }
+        .px-2 { padding-left: 8px; padding-right: 8px; }
+        .py-1 { padding-top: 4px; padding-bottom: 4px; }
+        .py-2 { padding-top: 8px; padding-bottom: 8px; }
+        .rounded { border-radius: 6px; }
+        .rounded-full { border-radius: 50%; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 8px; }
+        .gap-3 { gap: 12px; }
+        .gap-4 { gap: 16px; }
+        .w-6 { width: 24px; }
+        .h-6 { height: 24px; }
+        .w-4 { width: 16px; }
+        .h-4 { height: 16px; }
+        .text-green-600 { color: hsl(142 76% 36%); }
+        .text-red-600 { color: hsl(0 84% 60%); }
+        .text-slate-600 { color: hsl(215 25% 27%); }
+        .text-slate-700 { color: hsl(215 25% 27%); }
+        .text-muted { color: hsl(0 0% 45%); }
+        .bg-green-100 { background: hsl(142 76% 95%); }
+        .bg-red-100 { background: hsl(0 84% 95%); }
+        .text-green-800 { color: hsl(142 76% 20%); }
+        .text-red-800 { color: hsl(0 84% 20%); }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-section {
+                padding: 16px;
+            }
+            
+            .grid {
+                gap: 16px;
+            }
+            
+            .card-header,
+            .card-content {
+                padding: 16px;
+            }
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-positive {
+            background: hsl(142 76% 95%);
+            color: hsl(142 76% 20%);
+        }
+
+        .status-negative {
+            background: hsl(0 84% 95%);
+            color: hsl(0 84% 20%);
+        }
+
+        /* Modal/Dialog */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px 24px 12px;
+            border-bottom: 1px solid hsl(0 0% 95%);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .modal-body {
+            padding: 20px 24px;
+        }
+
+        .modal-footer {
+            padding: 12px 24px 20px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* Loading states */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Empty states */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: hsl(0 0% 45%);
+        }
+
+        .empty-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="sidebar-header">
+                <a href="#" class="sidebar-brand" id="homeLink">
+                    <i class="fas fa-church sidebar-brand-icon"></i>
+                    <div class="sidebar-brand-text">
+                        <div class="sidebar-brand-title font-serif">Grupo de Oração</div>
+                        <div class="sidebar-brand-subtitle font-serif">N.Sra. das Graças</div>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="sidebar-menu">
+                <div class="sidebar-menu-label">Menu Principal</div>
+                <ul class="sidebar-menu-list">
+                    <li class="sidebar-menu-item">
+                        <a href="#" class="sidebar-menu-link" data-section="tesouraria">
+                            <i class="fas fa-dollar-sign sidebar-menu-icon"></i>
+                            <span class="sidebar-menu-text">TESOURARIA</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-menu-item">
+                        <a href="#" class="sidebar-menu-link" data-section="membros">
+                            <i class="fas fa-users sidebar-menu-icon"></i>
+                            <span class="sidebar-menu-text">MEMBROS</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-menu-item">
+                        <a href="#" class="sidebar-menu-link" data-section="contabilidade">
+                            <i class="fas fa-chart-bar sidebar-menu-icon"></i>
+                            <span class="sidebar-menu-text">CONTABILIDADE</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="main-header-content">
+                    <button class="mobile-sidebar-toggle" id="mobileSidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Home Section -->
+            <section class="content-section active" id="home">
+                <div class="text-center mb-8">
+                    <i class="fas fa-church text-4xl mb-4" style="color: hsl(0 0% 15%);"></i>
+                    <h1 class="text-4xl font-serif font-bold mb-4" style="color: hsl(0 0% 15%);">
+                        Grupo de Oração
+                    </h1>
+                    <h2 class="text-2xl font-serif font-medium mb-6" style="color: hsl(0 0% 25%);">
+                        Nossa Senhora das Graças
+                    </h2>
+                    <p class="text-lg text-muted" style="max-width: 600px; margin: 0 auto;">
+                        Sistema de controle financeiro para acompanhar as contribuições, 
+                        despesas e balanço geral do nosso grupo de oração.
+                    </p>
+                </div>
+
+                <!-- Cards de Resumo -->
+                <div class="grid grid-4 mb-8" style="max-width: 1200px; margin: 0 auto;">
+                    <div class="card gradient-dark">
+                        <div class="card-header">
+                            <h3 class="card-subtitle" style="color: rgba(255,255,255,0.9); margin: 0;">
+                                <i class="fas fa-trending-up w-4 h-4"></i> Saldo Atual
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-2xl font-bold" id="homeSaldoAtual">R$ 0,00</div>
+                            <p style="font-size: 12px; opacity: 0.75; margin-top: 4px;">Entradas - Saídas</p>
+                        </div>
+                    </div>
+
+                    <div class="card gradient-gray">
+                        <div class="card-header">
+                            <h3 class="card-subtitle" style="color: rgba(255,255,255,0.9); margin: 0;">
+                                <i class="fas fa-users w-4 h-4"></i> Total Membros
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-2xl font-bold" id="homeTotalMembros">0</div>
+                            <p style="font-size: 12px; opacity: 0.75; margin-top: 4px;">Membros ativos</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-subtitle text-muted" style="margin: 0;">
+                                <i class="fas fa-calendar w-4 h-4"></i> Total RCC
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-2xl font-bold text-slate-700" id="homeTotalRcc">R$ 0,00</div>
+                            <p class="text-muted" style="font-size: 12px; margin-top: 4px;">Contribuições RCC</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-subtitle text-muted" style="margin: 0;">
+                                <i class="fas fa-piggy-bank w-4 h-4"></i> Total Caixa Extra
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-2xl font-bold text-slate-600" id="homeTotalCaixaExtra">R$ 0,00</div>
+                            <p class="text-muted" style="font-size: 12px; margin-top: 4px;">Contribuições extras</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cards de Informação -->
+                <div class="grid grid-2 mb-8" style="max-width: 1200px; margin: 0 auto;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title font-serif">Sobre o Sistema</h3>
+                        </div>
+                        <div class="card-content">
+                            <p class="text-muted mb-4">
+                                Este sistema foi desenvolvido especialmente para auxiliar no controle financeiro 
+                                do nosso grupo de oração, permitindo:
+                            </p>
+                            <ul style="list-style: none; padding: 0;">
+                                <li class="flex items-center gap-2 mb-2">
+                                    <div style="width: 8px; height: 8px; background: hsl(0 0% 15%); border-radius: 50%; flex-shrink: 0;"></div>
+                                    <span class="text-muted">Registro de entradas e saídas na tesouraria</span>
+                                </li>
+                                <li class="flex items-center gap-2 mb-2">
+                                    <div style="width: 8px; height: 8px; background: hsl(0 0% 15%); border-radius: 50%; flex-shrink: 0;"></div>
+                                    <span class="text-muted">Controle das contribuições RCC e caixa extra dos membros</span>
+                                </li>
+                                <li class="flex items-center gap-2 mb-2">
+                                    <div style="width: 8px; height: 8px; background: hsl(0 0% 15%); border-radius: 50%; flex-shrink: 0;"></div>
+                                    <span class="text-muted">Relatórios mensais e anuais completos</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <div style="width: 8px; height: 8px; background: hsl(0 0% 15%); border-radius: 50%; flex-shrink: 0;"></div>
+                                    <span class="text-muted">Acompanhamento de saldo e balanço financeiro</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title font-serif">Como Usar</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="w-6 h-6 gradient-dark text-center rounded-full flex items-center justify-center font-bold" style="color: white; font-size: 14px; flex-shrink: 0; margin-top: 2px;">1</div>
+                                <div>
+                                    <h4 class="font-medium">Tesouraria</h4>
+                                    <p class="text-muted" style="font-size: 14px;">Registre todas as entradas e saídas do caixa do grupo</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="w-6 h-6 gradient-dark text-center rounded-full flex items-center justify-center font-bold" style="color: white; font-size: 14px; flex-shrink: 0; margin-top: 2px;">2</div>
+                                <div>
+                                    <h4 class="font-medium">Membros</h4>
+                                    <p class="text-muted" style="font-size: 14px;">Gerencie os membros e suas contribuições mensais</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="w-6 h-6 gradient-dark text-center rounded-full flex items-center justify-center font-bold" style="color: white; font-size: 14px; flex-shrink: 0; margin-top: 2px;">3</div>
+                                <div>
+                                    <h4 class="font-medium">Contabilidade</h4>
+                                    <p class="text-muted" style="font-size: 14px;">Visualize relatórios e balanços mensais e anuais</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Atividades Recentes -->
+                <div class="card" style="max-width: 1200px; margin: 0 auto;">
+                    <div class="card-header">
+                        <h3 class="card-title font-serif">Atividades Recentes</h3>
+                    </div>
+                    <div class="card-content">
+                        <div id="recentActivities">
+                            <p class="text-center text-muted py-8">Nenhuma atividade registrada ainda</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tesouraria Section -->
+            <section class="content-section" id="tesouraria">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-serif font-bold mb-2" style="color: hsl(0 0% 15%);">Tesouraria</h1>
+                    <p class="text-muted">Controle de entradas e saídas do grupo</p>
+                </div>
+
+                <!-- Cards de Resumo -->
+                <div class="grid grid-3 mb-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-subtitle text-muted flex items-center gap-2" style="margin: 0;">
+                                <i class="fas fa-trending-up text-green-600"></i> Total Entradas
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-2xl font-bold text-green-600" id="totalEntradas">R$ 0,00</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-subtitle text-muted flex items-center gap-2" style="margin: 0;">
+                                <i class="fas fa-trending-down text-red-600"></i> Total Saídas
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-2xl font-bold text-red-600" id="totalSaidas">R$ 0,00</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-subtitle text-muted" style="margin: 0;">Saldo Atual</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-2xl font-bold" id="saldoAtual">R$ 0,00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-2">
+                    <!-- Formulário -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-plus"></i> Nova Transação
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <form class="form" id="transactionForm">
+                                <div class="form-group">
+                                    <label class="form-label">Tipo *</label>
+                                    <select class="form-select" id="transactionType" required>
+                                        <option value="entrada">Entrada</option>
+                                        <option value="saida">Saída</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Descrição *</label>
+                                    <textarea class="form-textarea" id="transactionDescription" placeholder="Descrição da transação" required></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Valor (R$) *</label>
+                                    <input type="number" class="form-input" id="transactionAmount" step="0.01" placeholder="0,00" required>
+                                </div>
+
+                                <div class="grid grid-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Mês</label>
+                                        <select class="form-select" id="transactionMonth">
+                                            <option value="1">Janeiro</option>
+                                            <option value="2">Fevereiro</option>
+                                            <option value="3">Março</option>
+                                            <option value="4">Abril</option>
+                                            <option value="5">Maio</option>
+                                            <option value="6">Junho</option>
+                                            <option value="7">Julho</option>
+                                            <option value="8">Agosto</option>
+                                            <option value="9">Setembro</option>
+                                            <option value="10">Outubro</option>
+                                            <option value="11">Novembro</option>
+                                            <option value="12">Dezembro</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Ano</label>
+                                        <select class="form-select" id="transactionYear"></select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Data</label>
+                                    <input type="date" class="form-input" id="transactionDate">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-full">
+                                    Registrar Transação
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Histórico -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Histórico Recente</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="table-container">
+                                <div id="transactionHistory">
+                                    <p class="text-center text-muted py-8">Nenhuma transação registrada ainda</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Membros Section -->
+            <section class="content-section" id="membros">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-serif font-bold mb-2" style="color: hsl(0 0% 15%);">Membros do Grupo</h1>
+                    <p class="text-muted">Gerenciamento de membros e contribuições</p>
+                </div>
+
+                <!-- Seletor de Mês/Ano e Totais -->
+                <div class="grid grid-4 mb-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-subtitle text-muted" style="margin: 0;">Mês/Ano</h3>
+                        </div>
+                        <div class="card-content">
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <select class="form-select" id="membersMonth">
+                                    <option value="1">Janeiro</option>
+                                    <option value="2">Fevereiro</option>
+                                    <option value="3">Março</option>
+                                    <option value="4">Abril</option>
+                                    <option value="5">Maio</option>
+                                    <option value="6">Junho</option>
+                                    <option value="7">Julho</option>
+                                    <option value="8">Agosto</option>
+                                    <option value="9">Setembro</option>
+                                    <option value="10">Outubro</option>
+                                    <option value="11">Novembro</option>
+                                    <option value="12">Dezembro</option>
+                                </select>
+                                <select class="form-select" id="membersYear"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-subtitle text-muted flex items-center gap-2" style="margin: 0;">
+                                <i class="fas fa-users"></i> Total Membros
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-2xl font-bold" style="color: hsl(0 0% 15%);" id="totalMembrosCount">0</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-subtitle text-muted" style="margin: 0;">Total RCC</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-2xl font-bold text-slate-700" id="totalRccMes">R$ 0,00</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-subtitle text-muted" style="margin: 0;">Total Caixa Extra</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-2xl font-bold text-slate-600" id="totalCaixaExtraMes">R$ 0,00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-1" style="grid-template-columns: 300px 1fr; gap: 24px;">
+                    <!-- Formulário para Adicionar Membro -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-plus"></i> Adicionar Membro
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <form class="form" id="memberForm">
+                                <div class="form-group">
+                                    <label class="form-label">Nome do Membro</label>
+                                    <input type="text" class="form-input" id="memberName" placeholder="Digite o nome completo" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-full">
+                                    Adicionar Membro
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Membros -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Membros - <span id="currentMonthYear">Janeiro 2025</span></h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="table-container">
+                                <div id="membersTable">
+                                    <p class="text-center text-muted py-8">Nenhum membro cadastrado</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contabilidade Section -->
+            <section class="content-section" id="contabilidade">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-serif font-bold mb-2" style="color: hsl(0 0% 15%);">Contabilidade</h1>
+                    <p class="text-muted">Balanço financeiro e relatórios anuais</p>
+                </div>
+
+                <!-- Seletor de Ano -->
+                <div class="flex justify-center mb-6">
+                    <div class="card" style="width: 200px;">
+                        <div class="card-header">
+                            <h3 class="card-subtitle text-muted text-center" style="margin: 0;">Selecionar Ano</h3>
+                        </div>
+                        <div class="card-content">
+                            <select class="form-select" id="contabilidadeYear"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumo Anual -->
+                <div class="grid grid-5 mb-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-subtitle text-muted flex items-center gap-2" style="margin: 0;">
+                                <i class="fas fa-trending-up text-green-600"></i> Entradas Totais
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-xl font-bold text-green-600" id="yearlyEntradas">R$ 0,00</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-subtitle text-muted flex items-center gap-2" style="margin: 0;">
+                                <i class="fas fa-dollar-sign text-slate-700"></i> RCC Total
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-xl font-bold text-slate-700" id="yearlyRcc">R$ 0,00</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-subtitle text-muted flex items-center gap-2" style="margin: 0;">
+                                <i class="fas fa-piggy-bank text-slate-600"></i> Caixa Extra Total
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-xl font-bold text-slate-600" id="yearlyCaixaExtra">R$ 0,00</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-subtitle text-muted flex items-center gap-2" style="margin: 0;">
+                                <i class="fas fa-trending-down text-red-600"></i> Saídas Totais
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-xl font-bold text-red-600" id="yearlySaidas">R$ 0,00</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-subtitle text-muted flex items-center gap-2" style="margin: 0;">
+                                <i class="fas fa-chart-bar"></i> Saldo Final
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-xl font-bold" id="yearlyBalance">R$ 0,00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Relatório Mensal -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-bar"></i> Relatório Mensal - <span id="reportYear">2025</span>
+                        </h3>
+                    </div>
+                    <div class="card-content">
+                        <div id="monthlyReport">
+                            <div class="empty-state">
+                                <i class="fas fa-chart-bar empty-icon"></i>
+                                <p class="text-lg font-medium text-muted mb-2">Nenhum dado encontrado</p>
+                                <p class="text-muted">Registre transações e contribuições dos membros para ver os relatórios aqui.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal para confirmar remoção de membro -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Remover Membro</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmText"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelBtn">Cancelar</button>
+                <button class="btn btn-danger" id="confirmBtn">Remover</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sistema de dados local
+        class DataManager {
+            constructor() {
+                this.transactions = this.loadData('grupo-oracao-transactions', []);
+                this.members = this.loadData('grupo-oracao-members', this.getInitialMembers());
+            }
+
+            loadData(key, defaultValue) {
+                const stored = localStorage.getItem(key);
+                return stored ? JSON.parse(stored) : defaultValue;
+            }
+
+            saveData(key, data) {
+                localStorage.setItem(key, JSON.stringify(data));
+            }
+
+            getInitialMembers() {
+                const memberNames = [
+                    'LUCAS NICOLAS', 'MILENA', 'TELMIRA', 'HENRIQUE', 'ROBERTA', 'NOEMI',
+                    'VERA', 'MARLY', 'FLAVIO', 'ENIO', 'JESSICA', 'MARIA LIMA',
+                    'MARIA DE JESUS', 'ELISANGELA', 'GERALDA', 'LUCAS OLIVEIRA'
+                ];
+
+                return memberNames.map((name, index) => ({
+                    id: `member-${index}`,
+                    name,
+                    rcc: {},
+                    caixaExtra: {}
+                }));
+            }
+
+            addTransaction(transaction) {
+                const newTransaction = {
+                    ...transaction,
+                    id: Date.now().toString()
+                };
+                this.transactions.push(newTransaction);
+                this.saveData('grupo-oracao-transactions', this.transactions);
+                return newTransaction;
+            }
+
+            addMember(name) {
+                const newMember = {
+                    id: `member-${Date.now()}`,
+                    name: name.toUpperCase(),
+                    rcc: {},
+                    caixaExtra: {}
+                };
+                this.members.push(newMember);
+                this.saveData('grupo-oracao-members', this.members);
+                return newMember;
+            }
+
+            removeMember(id) {
+                this.members = this.members.filter(member => member.id !== id);
+                this.saveData('grupo-oracao-members', this.members);
+            }
+
+            updateMemberValue(memberId, type, yearMonth, value) {
+                const member = this.members.find(m => m.id === memberId);
+                if (member) {
+                    member[type][yearMonth] = value;
+                    this.saveData('grupo-oracao-members', this.members);
+                }
+            }
+
+            getMonthlyData(year) {
+                const data = [];
+                const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+                for (let month = 1; month <= 12; month++) {
+                    const monthTransactions = this.transactions.filter(t => t.year === year && t.month === month);
+                    const totalEntradas = monthTransactions.filter(t => t.type === 'entrada').reduce((sum, t) => sum + t.amount, 0);
+                    const totalSaidas = monthTransactions.filter(t => t.type === 'saida').reduce((sum, t) => sum + t.amount, 0);
+                    
+                    const yearMonth = `${year}-${month}`;
+                    const totalRcc = this.members.reduce((sum, member) => sum + (member.rcc[yearMonth] || 0), 0);
+                    const totalCaixaExtra = this.members.reduce((sum, member) => sum + (member.caixaExtra[yearMonth] || 0), 0);
+                    
+                    const balance = (totalEntradas + totalRcc) - totalSaidas;
+                    
+                    data.push({
+                        month,
+                        year,
+                        monthName: months[month - 1],
+                        totalEntradas,
+                        totalSaidas,
+                        totalRcc,
+                        totalCaixaExtra,
+                        balance
+                    });
+                }
+                
+                return data;
+            }
+        }
+
+        // Sistema de navegação
+        class NavigationManager {
+            constructor(dataManager) {
+                this.dataManager = dataManager;
+                this.currentSection = 'home';
+                this.init();
+            }
+
+            init() {
+                // Event listeners para navegação
+                document.getElementById('homeLink').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showSection('home');
+                });
+
+                document.querySelectorAll('.sidebar-menu-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const section = link.dataset.section;
+                        this.showSection(section);
+                    });
+                });
+
+                // Toggle sidebar
+                document.getElementById('sidebarToggle').addEventListener('click', () => {
+                    document.getElementById('sidebar').classList.toggle('collapsed');
+                });
+
+                document.getElementById('mobileSidebarToggle').addEventListener('click', () => {
+                    document.getElementById('sidebar').classList.toggle('open');
+                });
+
+                // Inicializar seção home
+                this.showSection('home');
+            }
+
+            showSection(sectionName) {
+                // Esconder todas as seções
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+
+                // Mostrar seção ativa
+                document.getElementById(sectionName).classList.add('active');
+
+                // Atualizar navegação
+                document.querySelectorAll('.sidebar-menu-link, .sidebar-brand').forEach(link => {
+                    link.classList.remove('active');
+                });
+
+                if (sectionName === 'home') {
+                    document.getElementById('homeLink').classList.add('active');
+                } else {
+                    document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+                }
+
+                this.currentSection = sectionName;
+
+                // Atualizar dados da seção
+                this.updateSectionData(sectionName);
+            }
+
+            updateSectionData(sectionName) {
+                switch (sectionName) {
+                    case 'home':
+                        this.updateHomeData();
+                        break;
+                    case 'tesouraria':
+                        this.updateTesourariaData();
+                        break;
+                    case 'membros':
+                        this.updateMembrosData();
+                        break;
+                    case 'contabilidade':
+                        this.updateContabilidadeData();
+                        break;
+                }
+            }
+
+            updateHomeData() {
+                const totalEntradas = this.dataManager.transactions.filter(t => t.type === 'entrada').reduce((sum, t) => sum + t.amount, 0);
+                const totalSaidas = this.dataManager.transactions.filter(t => t.type === 'saida').reduce((sum, t) => sum + t.amount, 0);
+                const saldoAtual = totalEntradas - totalSaidas;
+                
+                const totalRccGeral = this.dataManager.members.reduce((sum, member) => {
+                    return sum + Object.values(member.rcc).reduce((memberSum, value) => memberSum + value, 0);
+                }, 0);
+                
+                const totalCaixaExtraGeral = this.dataManager.members.reduce((sum, member) => {
+                    return sum + Object.values(member.caixaExtra).reduce((memberSum, value) => memberSum + value, 0);
+                }, 0);
+
+                document.getElementById('homeSaldoAtual').textContent = `R$ ${saldoAtual.toFixed(2)}`;
+                document.getElementById('homeTotalMembros').textContent = this.dataManager.members.length;
+                document.getElementById('homeTotalRcc').textContent = `R$ ${totalRccGeral.toFixed(2)}`;
+                document.getElementById('homeTotalCaixaExtra').textContent = `R$ ${totalCaixaExtraGeral.toFixed(2)}`;
+
+                // Atividades recentes
+                const recentTransactions = this.dataManager.transactions.slice(-5).reverse();
+                const recentActivitiesElement = document.getElementById('recentActivities');
+                
+                if (recentTransactions.length === 0) {
+                    recentActivitiesElement.innerHTML = '<p class="text-center text-muted py-8">Nenhuma atividade registrada ainda</p>';
+                } else {
+                    recentActivitiesElement.innerHTML = recentTransactions.map(transaction => `
+                        <div class="flex justify-between items-center p-3 rounded border" style="border-color: hsl(0 0% 90%); margin-bottom: 12px;">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full" style="background: ${transaction.type === 'entrada' ? '#22c55e' : '#ef4444'};"></div>
+                                <div>
+                                    <p class="font-medium" style="font-size: 14px;">${transaction.description}</p>
+                                    <p class="text-muted" style="font-size: 12px;">${new Date(transaction.date).toLocaleDateString('pt-BR')}</p>
+                                </div>
+                            </div>
+                            <div class="font-bold ${transaction.type === 'entrada' ? 'text-green-600' : 'text-red-600'}">
+                                ${transaction.type === 'entrada' ? '+' : '-'}R$ ${transaction.amount.toFixed(2)}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            updateTesourariaData() {
+                const totalEntradas = this.dataManager.transactions.filter(t => t.type === 'entrada').reduce((sum, t) => sum + t.amount, 0);
+                const totalSaidas = this.dataManager.transactions.filter(t => t.type === 'saida').reduce((sum, t) => sum + t.amount, 0);
+                const saldo = totalEntradas - totalSaidas;
+
+                document.getElementById('totalEntradas').textContent = `R$ ${totalEntradas.toFixed(2)}`;
+                document.getElementById('totalSaidas').textContent = `R$ ${totalSaidas.toFixed(2)}`;
+                document.getElementById('saldoAtual').textContent = `R$ ${saldo.toFixed(2)}`;
+                document.getElementById('saldoAtual').className = `text-2xl font-bold ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}`;
+
+                // Histórico
+                const historyElement = document.getElementById('transactionHistory');
+                const recentTransactions = this.dataManager.transactions.slice(-10).reverse();
+                
+                if (recentTransactions.length === 0) {
+                    historyElement.innerHTML = '<p class="text-center text-muted py-8">Nenhuma transação registrada ainda</p>';
+                } else {
+                    historyElement.innerHTML = recentTransactions.map(transaction => `
+                        <div class="flex justify-between items-start p-3 rounded border" style="border-color: hsl(0 0% 90%); margin-bottom: 12px;">
+                            <div style="flex: 1;">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <i class="fas fa-${transaction.type === 'entrada' ? 'trending-up' : 'trending-down'} ${transaction.type === 'entrada' ? 'text-green-600' : 'text-red-600'}" style="font-size: 14px;"></i>
+                                    <span class="font-medium" style="text-transform: capitalize;">${transaction.type}</span>
+                                </div>
+                                <p class="text-muted" style="font-size: 14px;">${transaction.description}</p>
+                                <p class="text-muted" style="font-size: 12px;">
+                                    ${new Date(transaction.date).toLocaleDateString('pt-BR')} • ${this.getMonthName(transaction.month)} ${transaction.year}
+                                </p>
+                            </div>
+                            <div class="font-bold ${transaction.type === 'entrada' ? 'text-green-600' : 'text-red-600'}">
+                                ${transaction.type === 'entrada' ? '+' : '-'}R$ ${transaction.amount.toFixed(2)}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            updateMembrosData() {
+                const selectedMonth = parseInt(document.getElementById('membersMonth').value);
+                const selectedYear = parseInt(document.getElementById('membersYear').value);
+                const yearMonth = `${selectedYear}-${selectedMonth}`;
+
+                const totalRcc = this.dataManager.members.reduce((sum, member) => sum + (member.rcc[yearMonth] || 0), 0);
+                const totalCaixaExtra = this.dataManager.members.reduce((sum, member) => sum + (member.caixaExtra[yearMonth] || 0), 0);
+
+                document.getElementById('totalMembrosCount').textContent = this.dataManager.members.length;
+                document.getElementById('totalRccMes').textContent = `R$ ${totalRcc.toFixed(2)}`;
+                document.getElementById('totalCaixaExtraMes').textContent = `R$ ${totalCaixaExtra.toFixed(2)}`;
+                document.getElementById('currentMonthYear').textContent = `${this.getMonthName(selectedMonth)} ${selectedYear}`;
+
+                // Tabela de membros
+                const membersTableElement = document.getElementById('membersTable');
+                
+                if (this.dataManager.members.length === 0) {
+                    membersTableElement.innerHTML = '<p class="text-center text-muted py-8">Nenhum membro cadastrado</p>';
+                } else {
+                    const membersTableHTML = `
+                        <div class="grid" style="grid-template-columns: 5fr 3fr 3fr 1fr; gap: 8px; padding: 12px; background: hsl(0 0% 98%); border-radius: 8px; font-weight: 500; font-size: 14px; margin-bottom: 16px;">
+                            <div>Nome</div>
+                            <div class="text-center">RCC (R$)</div>
+                            <div class="text-center">Caixa Extra (R$)</div>
+                            <div class="text-center">Ações</div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            ${this.dataManager.members.map(member => `
+                                <div class="grid" style="grid-template-columns: 5fr 3fr 3fr 1fr; gap: 8px; padding: 12px; border: 1px solid hsl(0 0% 90%); border-radius: 8px; align-items: center;">
+                                    <div class="font-medium" style="font-size: 14px;">${member.name}</div>
+                                    <div>
+                                        <input type="number" step="0.01" value="${member.rcc[yearMonth] || 0}" 
+                                               class="form-input text-center" style="height: 32px;"
+                                               onchange="app.updateMemberValue('${member.id}', 'rcc', '${yearMonth}', this.value)">
+                                    </div>
+                                    <div>
+                                        <input type="number" step="0.01" value="${member.caixaExtra[yearMonth] || 0}" 
+                                               class="form-input text-center" style="height: 32px;"
+                                               onchange="app.updateMemberValue('${member.id}', 'caixaExtra', '${yearMonth}', this.value)">
+                                    </div>
+                                    <div class="flex justify-center">
+                                        <button class="btn btn-sm text-red-600" style="background: none; padding: 4px 8px;" 
+                                                onclick="app.confirmRemoveMember('${member.id}', '${member.name}')">
+                                            <i class="fas fa-trash" style="font-size: 14px;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    membersTableElement.innerHTML = membersTableHTML;
+                }
+            }
+
+            updateContabilidadeData() {
+                const selectedYear = parseInt(document.getElementById('contabilidadeYear').value);
+                document.getElementById('reportYear').textContent = selectedYear;
+
+                const monthlyData = this.dataManager.getMonthlyData(selectedYear);
+                const yearlyTotals = monthlyData.reduce((acc, month) => ({
+                    totalEntradas: acc.totalEntradas + month.totalEntradas,
+                    totalSaidas: acc.totalSaidas + month.totalSaidas,
+                    totalRcc: acc.totalRcc + month.totalRcc,
+                    totalCaixaExtra: acc.totalCaixaExtra + month.totalCaixaExtra,
+                    balance: acc.balance + month.balance
+                }), {
+                    totalEntradas: 0,
+                    totalSaidas: 0,
+                    totalRcc: 0,
+                    totalCaixaExtra: 0,
+                    balance: 0
+                });
+
+                document.getElementById('yearlyEntradas').textContent = `R$ ${yearlyTotals.totalEntradas.toFixed(2)}`;
+                document.getElementById('yearlyRcc').textContent = `R$ ${yearlyTotals.totalRcc.toFixed(2)}`;
+                document.getElementById('yearlyCaixaExtra').textContent = `R$ ${yearlyTotals.totalCaixaExtra.toFixed(2)}`;
+                document.getElementById('yearlySaidas').textContent = `R$ ${yearlyTotals.totalSaidas.toFixed(2)}`;
+                document.getElementById('yearlyBalance').textContent = `R$ ${yearlyTotals.balance.toFixed(2)}`;
+                document.getElementById('yearlyBalance').className = `text-xl font-bold ${yearlyTotals.balance >= 0 ? 'text-green-600' : 'text-red-600'}`;
+
+                // Relatório mensal
+                const monthlyReportElement = document.getElementById('monthlyReport');
+                const monthsWithData = monthlyData.filter(month => 
+                    month.totalEntradas > 0 || month.totalSaidas > 0 || month.totalRcc > 0 || month.totalCaixaExtra > 0
+                );
+
+                if (monthsWithData.length === 0) {
+                    monthlyReportElement.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-chart-bar empty-icon"></i>
+                            <p class="text-lg font-medium text-muted mb-2">Nenhum dado encontrado para ${selectedYear}</p>
+                            <p class="text-muted">Registre transações e contribuições dos membros para ver os relatórios aqui.</p>
+                        </div>
+                    `;
+                } else {
+                    const reportHTML = `
+                        <div class="grid" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 8px; padding: 12px; background: hsl(0 0% 98%); border-radius: 8px; font-weight: 500; font-size: 14px; margin-bottom: 16px;">
+                            <div>Mês</div>
+                            <div class="text-center">Entradas</div>
+                            <div class="text-center">RCC</div>
+                            <div class="text-center">Caixa Extra</div>
+                            <div class="text-center">Saídas</div>
+                            <div class="text-center">Saldo</div>
+                            <div class="text-center">Status</div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto;">
+                            ${monthsWithData.map(data => `
+                                <div class="grid" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 8px; padding: 12px; border: 1px solid hsl(0 0% 90%); border-radius: 8px; align-items: center;">
+                                    <div class="font-medium">${data.monthName}</div>
+                                    <div class="text-center text-green-600 font-medium">R$ ${data.totalEntradas.toFixed(2)}</div>
+                                    <div class="text-center text-slate-700 font-medium">R$ ${data.totalRcc.toFixed(2)}</div>
+                                    <div class="text-center text-slate-600 font-medium">R$ ${data.totalCaixaExtra.toFixed(2)}</div>
+                                    <div class="text-center text-red-600 font-medium">R$ ${data.totalSaidas.toFixed(2)}</div>
+                                    <div class="text-center font-bold ${data.balance >= 0 ? 'text-green-600' : 'text-red-600'}">R$ ${data.balance.toFixed(2)}</div>
+                                    <div class="text-center">
+                                        <span class="status-badge ${data.balance >= 0 ? 'status-positive' : 'status-negative'}">
+                                            ${data.balance >= 0 ? 'Positivo' : 'Negativo'}
+                                        </span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="grid" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 8px; padding: 12px; background: rgba(0,0,0,0.05); border-radius: 8px; font-weight: bold; font-size: 14px; border: 2px solid rgba(0,0,0,0.1); margin-top: 16px;">
+                            <div>TOTAL ${selectedYear}</div>
+                            <div class="text-center text-green-600">R$ ${yearlyTotals.totalEntradas.toFixed(2)}</div>
+                            <div class="text-center text-slate-700">R$ ${yearlyTotals.totalRcc.toFixed(2)}</div>
+                            <div class="text-center text-slate-600">R$ ${yearlyTotals.totalCaixaExtra.toFixed(2)}</div>
+                            <div class="text-center text-red-600">R$ ${yearlyTotals.totalSaidas.toFixed(2)}</div>
+                            <div class="text-center ${yearlyTotals.balance >= 0 ? 'text-green-600' : 'text-red-600'}">R$ ${yearlyTotals.balance.toFixed(2)}</div>
+                            <div class="text-center">
+                                <span class="status-badge ${yearlyTotals.balance >= 0 ? 'status-positive' : 'status-negative'}">
+                                    ${yearlyTotals.balance >= 0 ? 'Positivo' : 'Negativo'}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                    monthlyReportElement.innerHTML = reportHTML;
+                }
+            }
+
+            getMonthName(monthNumber) {
+                const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                return months[monthNumber - 1];
+            }
+        }
+
+        // Sistema principal da aplicação
+        class FinanceApp {
+            constructor() {
+                this.dataManager = new DataManager();
+                this.navigationManager = new NavigationManager(this.dataManager);
+                this.init();
+            }
+
+            init() {
+                this.setupYearSelectors();
+                this.setupForms();
+                this.setupModal();
+                this.setCurrentDate();
+            }
+
+            setupYearSelectors() {
+                const years = Array.from({ length: 26 }, (_, i) => 2025 + i);
+                const currentYear = new Date().getFullYear();
+
+                const yearSelectors = ['transactionYear', 'membersYear', 'contabilidadeYear'];
+                yearSelectors.forEach(selectorId => {
+                    const selector = document.getElementById(selectorId);
+                    selector.innerHTML = years.map(year => 
+                        `<option value="${year}" ${year === currentYear ? 'selected' : ''}>${year}</option>`
+                    ).join('');
+                });
+            }
+
+            setupForms() {
+                // Formulário de transação
+                document.getElementById('transactionForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleTransactionForm();
+                });
+
+                // Formulário de membro
+                document.getElementById('memberForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleMemberForm();
+                });
+
+                // Event listeners para mudança de mês/ano em membros
+                document.getElementById('membersMonth').addEventListener('change', () => {
+                    this.navigationManager.updateMembrosData();
+                });
+
+                document.getElementById('membersYear').addEventListener('change', () => {
+                    this.navigationManager.updateMembrosData();
+                });
+
+                // Event listener para mudança de ano em contabilidade
+                document.getElementById('contabilidadeYear').addEventListener('change', () => {
+                    this.navigationManager.updateContabilidadeData();
+                });
+            }
+
+            setupModal() {
+                this.memberToRemove = null;
+
+                document.getElementById('cancelBtn').addEventListener('click', () => {
+                    document.getElementById('confirmModal').classList.remove('open');
+                });
+
+                document.getElementById('confirmBtn').addEventListener('click', () => {
+                    if (this.memberToRemove) {
+                        this.dataManager.removeMember(this.memberToRemove.id);
+                        this.showToast(`${this.memberToRemove.name} foi removido da lista`, 'success');
+                        this.navigationManager.updateMembrosData();
+                        this.navigationManager.updateHomeData();
+                    }
+                    document.getElementById('confirmModal').classList.remove('open');
+                });
+
+                // Fechar modal clicando fora
+                document.getElementById('confirmModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'confirmModal') {
+                        document.getElementById('confirmModal').classList.remove('open');
+                    }
+                });
+            }
+
+            setCurrentDate() {
+                const now = new Date();
+                const currentMonth = now.getMonth() + 1;
+                const currentYear = now.getFullYear();
+                const currentDate = now.toISOString().split('T')[0];
+
+                document.getElementById('transactionMonth').value = currentMonth;
+                document.getElementById('transactionYear').value = currentYear;
+                document.getElementById('transactionDate').value = currentDate;
+
+                document.getElementById('membersMonth').value = currentMonth;
+                document.getElementById('membersYear').value = currentYear;
+
+                document.getElementById('contabilidadeYear').value = currentYear;
+            }
+
+            handleTransactionForm() {
+                const form = document.getElementById('transactionForm');
+                const formData = new FormData(form);
+
+                const type = document.getElementById('transactionType').value;
+                const description = document.getElementById('transactionDescription').value;
+                const amount = parseFloat(document.getElementById('transactionAmount').value);
+                const month = parseInt(document.getElementById('transactionMonth').value);
+                const year = parseInt(document.getElementById('transactionYear').value);
+                const date = document.getElementById('transactionDate').value;
+
+                if (!description || !amount) {
+                    this.showToast('Preencha todos os campos obrigatórios', 'error');
+                    return;
+                }
+
+                this.dataManager.addTransaction({
+                    type,
+                    description,
+                    amount,
+                    month,
+                    year,
+                    date
+                });
+
+                this.showToast(`${type === 'entrada' ? 'Entrada' : 'Saída'} registrada com sucesso!`, 'success');
+
+                // Limpar campos
+                document.getElementById('transactionDescription').value = '';
+                document.getElementById('transactionAmount').value = '';
+
+                // Atualizar dados
+                this.navigationManager.updateTesourariaData();
+                this.navigationManager.updateHomeData();
+            }
+
+            handleMemberForm() {
+                const name = document.getElementById('memberName').value.trim();
+
+                if (!name) {
+                    this.showToast('Digite o nome do membro', 'error');
+                    return;
+                }
+
+                if (this.dataManager.members.some(m => m.name.toLowerCase() === name.toLowerCase())) {
+                    this.showToast('Já existe um membro com este nome', 'error');
+                    return;
+                }
+
+                this.dataManager.addMember(name);
+                this.showToast('Membro adicionado com sucesso!', 'success');
+
+                // Limpar campo
+                document.getElementById('memberName').value = '';
+
+                // Atualizar dados
+                this.navigationManager.updateMembrosData();
+                this.navigationManager.updateHomeData();
+            }
+
+            updateMemberValue(memberId, type, yearMonth, value) {
+                const numValue = parseFloat(value) || 0;
+                this.dataManager.updateMemberValue(memberId, type, yearMonth, numValue);
+                this.navigationManager.updateMembrosData();
+                this.navigationManager.updateHomeData();
+            }
+
+            confirmRemoveMember(memberId, memberName) {
+                this.memberToRemove = { id: memberId, name: memberName };
+                document.getElementById('confirmText').innerHTML = 
+                    `Tem certeza que deseja remover <strong>${memberName}</strong> da lista de membros? 
+                     Esta ação não pode ser desfeita e todos os dados históricos serão perdidos.`;
+                document.getElementById('confirmModal').classList.add('open');
+            }
+
+            showToast(message, type = 'info') {
+                // Criar elemento de toast
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: ${type === 'error' ? '#ef4444' : '#22c55e'};
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    font-weight: 500;
+                    z-index: 1000;
+                    animation: slideIn 0.3s ease-out;
+                `;
+                toast.textContent = message;
+
+                // Adicionar animação CSS
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOut {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+
+                document.body.appendChild(toast);
+
+                // Remover após 3 segundos
+                setTimeout(() => {
+                    toast.style.animation = 'slideOut 0.3s ease-out';
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+        }
+
+        // Inicializar aplicação
+        const app = new FinanceApp();
+
+        // Expor funções globais necessárias
+        window.app = app;
+    </script>
+</body>
+</html>
