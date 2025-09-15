@@ -3,1197 +3,588 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grupo de Oração Nossa Senhora das Graças - Controle Financeiro</title>
+    <title>GONSG - Tesouraria</title>
     <meta name="description" content="Sistema de controle financeiro para o Grupo de Oração Nossa Senhora das Graças">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* Reset e base */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* Base e Utilities */
+        :root {
+            --primary: hsl(230 50% 50%);
+            --primary-dark: hsl(230 50% 40%);
+            --text-base: hsl(0 0% 15%);
+            --text-muted: hsl(0 0% 40%);
+            --bg-light: hsl(0 0% 98%);
+            --border: hsl(0 0% 90%);
         }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(180deg, hsl(0 0% 98%), hsl(0 0% 96%));
-            color: hsl(0 0% 15%);
+            background: var(--bg-light);
+            color: var(--text-base);
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-
-        .font-serif {
-            font-family: 'Playfair Display', serif;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            width: 100%;
         }
+        h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
+        .flex { display: flex; }
+        .grid { display: grid; }
+        .gap-4 { gap: 1rem; }
+        .rounded-lg { border-radius: 8px; }
+        .shadow { box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .p-4 { padding: 1rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .text-center { text-align: center; }
+        .text-sm { font-size: 0.875rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        .text-2xl { font-size: 1.5rem; }
+        .font-bold { font-weight: 700; }
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .bg-white { background-color: white; }
+        .border { border: 1px solid var(--border); }
+        .text-muted { color: var(--text-muted); }
+        .text-green-600 { color: #16a34a; }
+        .text-red-600 { color: #dc2626; }
+        .text-blue-600 { color: #2563eb; }
+        .w-full { width: 100%; }
+        .form-group { display: flex; flex-direction: column; gap: 0.25rem; }
+        .form-input, .form-select {
+            padding: 0.6rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+            background: white;
+            color: var(--text-base);
+            transition: border-color 0.2s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .btn:hover { background-color: var(--primary-dark); }
+        .btn:active { transform: translateY(1px); }
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Layout principal */
-        .app-container {
+        /* Layout Principal */
+        .app-layout {
             display: flex;
             min-height: 100vh;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            background: hsl(0 0% 98%);
         }
 
         /* Sidebar */
         .sidebar {
-            width: 280px;
-            background: white;
-            border-right: 1px solid hsl(0 0% 90%);
-            box-shadow: 0 4px 20px -4px hsl(0 0% 0% / 0.08);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 250px;
+            background: var(--text-base);
+            color: white;
+            padding: 1.5rem;
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(0);
+            z-index: 10;
         }
-
         .sidebar.collapsed {
-            width: 60px;
+            transform: translateX(-100%);
         }
-
-        .sidebar-toggle {
-            padding: 8px;
-            margin: 8px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            align-self: flex-end;
-        }
-
-        .sidebar-toggle:hover {
-            background: hsl(0 0% 95%);
-        }
-
-        .sidebar-header {
-            padding: 16px;
-            border-bottom: 1px solid hsl(0 0% 90%);
-        }
-
         .sidebar-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            border-radius: 8px;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .sidebar-brand:hover {
-            background: hsl(0 0% 95%);
-        }
-
-        .sidebar-brand.active {
-            background: linear-gradient(135deg, hsl(0 0% 8%), hsl(0 0% 15%));
-            color: white;
-            box-shadow: 0 10px 40px -10px hsl(0 0% 0% / 0.3);
-        }
-
-        .sidebar-brand-icon {
-            width: 24px;
-            height: 24px;
-            flex-shrink: 0;
-        }
-
-        .sidebar-brand-text {
-            text-align: left;
-        }
-
-        .sidebar-brand-title {
-            font-weight: 600;
-            font-size: 14px;
-            line-height: 1.2;
-        }
-
-        .sidebar-brand-subtitle {
-            font-size: 12px;
-            opacity: 0.9;
-        }
-
-        .sidebar-menu {
-            padding: 24px 0;
-        }
-
-        .sidebar-menu-label {
-            padding: 0 16px;
-            color: hsl(0 0% 45%);
-            font-weight: 500;
-            font-size: 12px;
-            margin-bottom: 12px;
-        }
-
-        .sidebar-menu-list {
-            list-style: none;
-            padding: 0 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .sidebar-menu-item {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
             display: block;
-        }
-
-        .sidebar-menu-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            border-radius: 8px;
             text-decoration: none;
-            color: inherit;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .sidebar-menu-link:hover {
-            background: hsl(0 0% 95%);
-            box-shadow: 0 4px 20px -4px hsl(0 0% 0% / 0.08);
-        }
-
-        .sidebar-menu-link.active {
-            background: linear-gradient(135deg, hsl(0 0% 8%), hsl(0 0% 15%));
             color: white;
-            box-shadow: 0 10px 40px -10px hsl(0 0% 0% / 0.3);
         }
-
-        .sidebar-menu-icon {
-            width: 20px;
-            height: 20px;
-            flex-shrink: 0;
-        }
-
-        .collapsed .sidebar-brand-text,
-        .collapsed .sidebar-menu-label,
-        .collapsed .sidebar-menu-text {
-            display: none;
-        }
-
-        /* Main content */
-        .main-content {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .main-header {
-            position: sticky;
-            top: 0;
-            z-index: 40;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid hsl(0 0% 90%);
-        }
-
-        .main-header-content {
+        .sidebar-menu a {
             display: flex;
-            height: 56px;
             align-items: center;
-            padding: 0 16px;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
         }
 
-        .mobile-sidebar-toggle {
-            display: none;
-            padding: 8px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            border-radius: 8px;
-        }
-
-        @media (max-width: 768px) {
-            .mobile-sidebar-toggle {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .sidebar {
-                position: fixed;
-                left: -280px;
-                z-index: 50;
-                height: 100vh;
-            }
-            
-            .sidebar.open {
-                left: 0;
-            }
-        }
-
-        /* Content sections */
+        /* Seções de Conteúdo */
         .content-section {
             display: none;
-            padding: 24px;
         }
-
         .content-section.active {
             display: block;
         }
-
-        /* Cards */
-        .card {
-            background: white;
-            border-radius: 8px;
-            border: 1px solid hsl(0 0% 90%);
-            box-shadow: 0 4px 20px -4px hsl(0 0% 0% / 0.08);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .card:hover {
-            box-shadow: 0 8px 32px -8px hsl(0 0% 0% / 0.15);
-        }
-
-        .card-header {
-            padding: 20px 24px 12px;
-            border-bottom: 1px solid hsl(0 0% 95%);
-        }
-
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0;
+        .section-header {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 8px;
+            margin-bottom: 1.5rem;
         }
 
-        .card-subtitle {
-            font-size: 14px;
-            color: hsl(0 0% 45%);
-            margin: 4px 0 0;
+        /* Tabela de Membros */
+        .table-responsive {
+            overflow-x: auto;
         }
-
-        .card-content {
-            padding: 20px 24px;
-        }
-
-        /* Gradientes especiais */
-        .gradient-dark {
-            background: linear-gradient(135deg, hsl(0 0% 8%), hsl(0 0% 15%));
-            color: white;
-            box-shadow: 0 10px 40px -10px hsl(0 0% 0% / 0.3);
-        }
-
-        .gradient-gray {
-            background: linear-gradient(135deg, hsl(0 0% 25%), hsl(0 0% 35%));
-            color: white;
-            box-shadow: 0 8px 32px -8px hsl(0 0% 0% / 0.15);
-        }
-
-        /* Grids */
-        .grid {
+        .member-grid {
             display: grid;
-            gap: 24px;
-        }
-
-        .grid-1 { grid-template-columns: 1fr; }
-        .grid-2 { grid-template-columns: repeat(2, 1fr); }
-        .grid-3 { grid-template-columns: repeat(3, 1fr); }
-        .grid-4 { grid-template-columns: repeat(4, 1fr); }
-        .grid-5 { grid-template-columns: repeat(5, 1fr); }
-
-        @media (max-width: 1024px) {
-            .grid-4, .grid-5 { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        @media (max-width: 768px) {
-            .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr; }
-        }
-
-        /* Forms */
-        .form {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .form-label {
-            font-weight: 500;
-            font-size: 14px;
-            color: hsl(0 0% 15%);
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            padding: 10px 12px;
-            border: 1px solid hsl(0 0% 90%);
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.2s;
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: hsl(0 0% 15%);
-            box-shadow: 0 0 0 1px hsl(0 0% 15%);
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-flex;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
-            text-decoration: none;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, hsl(0 0% 8%), hsl(0 0% 15%));
-            color: white;
-            box-shadow: 0 10px 40px -10px hsl(0 0% 0% / 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 15px 50px -10px hsl(0 0% 0% / 0.4);
-        }
-
-        .btn-secondary {
-            background: hsl(0 0% 95%);
-            color: hsl(0 0% 15%);
-        }
-
-        .btn-secondary:hover {
-            background: hsl(0 0% 90%);
-        }
-
-        .btn-danger {
-            background: hsl(0 84.2% 60.2%);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: hsl(0 84.2% 55%);
-        }
-
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-
-        .btn-full {
-            width: 100%;
-        }
-
-        /* Tables */
-        .table-container {
-            max-height: 400px;
-            overflow-y: auto;
-            border-radius: 8px;
-            border: 1px solid hsl(0 0% 90%);
-        }
-
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .table th,
-        .table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid hsl(0 0% 95%);
-        }
-
-        .table th {
-            background: hsl(0 0% 98%);
-            font-weight: 600;
-            font-size: 14px;
-            color: hsl(0 0% 45%);
-        }
-
-        .table td {
-            font-size: 14px;
-        }
-
-        .table tbody tr:hover {
-            background: hsl(0 0% 98%);
-        }
-
-        /* Utility classes */
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
-        .text-lg { font-size: 18px; }
-        .text-xl { font-size: 20px; }
-        .text-2xl { font-size: 24px; }
-        .text-3xl { font-size: 30px; }
-        .text-4xl { font-size: 36px; }
-        .font-bold { font-weight: 700; }
-        .font-semibold { font-weight: 600; }
-        .font-medium { font-weight: 500; }
-        .mb-2 { margin-bottom: 8px; }
-        .mb-4 { margin-bottom: 16px; }
-        .mb-6 { margin-bottom: 24px; }
-        .mb-8 { margin-bottom: 32px; }
-        .mt-1 { margin-top: 4px; }
-        .mt-2 { margin-top: 8px; }
-        .mt-4 { margin-top: 16px; }
-        .p-2 { padding: 8px; }
-        .p-3 { padding: 12px; }
-        .p-4 { padding: 16px; }
-        .px-2 { padding-left: 8px; padding-right: 8px; }
-        .py-1 { padding-top: 4px; padding-bottom: 4px; }
-        .py-2 { padding-top: 8px; padding-bottom: 8px; }
-        .rounded { border-radius: 6px; }
-        .rounded-full { border-radius: 50%; }
-        .flex { display: flex; }
-        .items-center { align-items: center; }
-        .justify-center { justify-content: center; }
-        .justify-between { justify-content: space-between; }
-        .gap-2 { gap: 8px; }
-        .gap-3 { gap: 12px; }
-        .gap-4 { gap: 16px; }
-        .w-6 { width: 24px; }
-        .h-6 { height: 24px; }
-        .w-4 { width: 16px; }
-        .h-4 { height: 16px; }
-        .text-green-600 { color: hsl(142 76% 36%); }
-        .text-red-600 { color: hsl(0 84% 60%); }
-        .text-slate-600 { color: hsl(215 25% 27%); }
-        .text-slate-700 { color: hsl(215 25% 27%); }
-        .text-muted { color: hsl(0 0% 45%); }
-        .bg-green-100 { background: hsl(142 76% 95%); }
-        .bg-red-100 { background: hsl(0 84% 95%); }
-        .text-green-800 { color: hsl(142 76% 20%); }
-        .text-red-800 { color: hsl(0 84% 20%); }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .content-section {
-                padding: 16px;
-            }
-            
-            .grid {
-                gap: 16px;
-            }
-            
-            .card-header,
-            .card-content {
-                padding: 16px;
-            }
-        }
-
-        /* Status badges */
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
+            padding: 0.75rem 1rem;
+            background: var(--bg-light);
+            border-radius: 6px;
             font-weight: 500;
+            font-size: 0.875rem;
+            border: 1px solid var(--border);
+        }
+        .member-grid.header {
+            background: hsl(0 0% 95%);
+            font-weight: 600;
         }
 
-        .status-positive {
-            background: hsl(142 76% 95%);
-            color: hsl(142 76% 20%);
-        }
-
-        .status-negative {
-            background: hsl(0 84% 95%);
-            color: hsl(0 84% 20%);
-        }
-
-        /* Modal/Dialog */
+        /* Modal */
         .modal {
-            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 100;
-            align-items: center;
+            background: rgba(0,0,0,0.5);
+            display: none;
             justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
         }
-
         .modal.open {
             display: flex;
+            opacity: 1;
         }
-
         .modal-content {
             background: white;
+            padding: 2rem;
             border-radius: 8px;
-            max-width: 400px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
             width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            padding: 20px 24px 12px;
-            border-bottom: 1px solid hsl(0 0% 95%);
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .modal-body {
-            padding: 20px 24px;
-        }
-
-        .modal-footer {
-            padding: 12px 24px 20px;
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-        }
-
-        /* Loading states */
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        /* Empty states */
-        .empty-state {
+            max-width: 450px;
             text-align: center;
-            padding: 48px 24px;
-            color: hsl(0 0% 45%);
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
         }
 
-        .empty-icon {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 16px;
-            opacity: 0.5;
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #22c55e;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .toast-error { background: #ef4444; }
+
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes slideOut { from { transform: translateX(0); } to { transform: translateX(100%); } }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .app-layout { flex-direction: column; }
+            .sidebar {
+                width: 100%;
+                height: 100%;
+                position: fixed;
+                top: 0;
+                left: 0;
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                padding: 1rem;
+            }
+            .hamburger-menu {
+                display: block;
+            }
+            .section-header {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                justify-content: start;
+            }
+            .member-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .member-grid .name { grid-column: 1 / 3; }
+            .member-grid .actions { grid-column: 1 / 3; justify-self: center; }
+            .monthly-report-grid {
+                grid-template-columns: 1fr 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebarToggle">
-                <i class="fas fa-bars"></i>
-            </button>
-            
-            <div class="sidebar-header">
-                <a href="#" class="sidebar-brand" id="homeLink">
-                    <i class="fas fa-church sidebar-brand-icon"></i>
-                    <div class="sidebar-brand-text">
-                        <div class="sidebar-brand-title font-serif">Grupo de Oração</div>
-                        <div class="sidebar-brand-subtitle font-serif">N.Sra. das Graças</div>
-                    </div>
-                </a>
-            </div>
 
+    <div class="app-layout">
+        <aside id="sidebar" class="sidebar">
+            <a href="#" class="sidebar-brand" id="homeLink">GONSG Tesouraria</a>
             <nav class="sidebar-menu">
-                <div class="sidebar-menu-label">Menu Principal</div>
-                <ul class="sidebar-menu-list">
-                    <li class="sidebar-menu-item">
-                        <a href="#" class="sidebar-menu-link" data-section="tesouraria">
-                            <i class="fas fa-dollar-sign sidebar-menu-icon"></i>
-                            <span class="sidebar-menu-text">TESOURARIA</span>
-                        </a>
-                    </li>
-                    <li class="sidebar-menu-item">
-                        <a href="#" class="sidebar-menu-link" data-section="membros">
-                            <i class="fas fa-users sidebar-menu-icon"></i>
-                            <span class="sidebar-menu-text">MEMBROS</span>
-                        </a>
-                    </li>
-                    <li class="sidebar-menu-item">
-                        <a href="#" class="sidebar-menu-link" data-section="contabilidade">
-                            <i class="fas fa-chart-bar sidebar-menu-icon"></i>
-                            <span class="sidebar-menu-text">CONTABILIDADE</span>
-                        </a>
-                    </li>
-                </ul>
+                <a href="#" data-section="home" class="sidebar-menu-link active"><i class="fas fa-home"></i> Início</a>
+                <a href="#" data-section="tesouraria" class="sidebar-menu-link"><i class="fas fa-coins"></i> Tesouraria</a>
+                <a href="#" data-section="membros" class="sidebar-menu-link"><i class="fas fa-users"></i> Membros</a>
+                <a href="#" data-section="contabilidade" class="sidebar-menu-link"><i class="fas fa-chart-line"></i> Contabilidade</a>
             </nav>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <header class="main-header">
-                <div class="main-header-content">
-                    <button class="mobile-sidebar-toggle" id="mobileSidebarToggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
-            </header>
-
-            <!-- Home Section -->
-            <section class="content-section active" id="home">
-                <div class="text-center mb-8">
-                    <i class="fas fa-church text-4xl mb-4" style="color: hsl(0 0% 15%);"></i>
-                    <h1 class="text-4xl font-serif font-bold mb-4" style="color: hsl(0 0% 15%);">
-                        Grupo de Oração
-                    </h1>
-                    <h2 class="text-2xl font-serif font-medium mb-6" style="color: hsl(0 0% 25%);">
-                        Nossa Senhora das Graças
-                    </h2>
-                    <p class="text-lg text-muted" style="max-width: 600px; margin: 0 auto;">
-                        Sistema de controle financeiro para acompanhar as contribuições, 
-                        despesas e balanço geral do nosso grupo de oração.
-                    </p>
-                </div>
-
-                <!-- Cards de Resumo -->
-                <div class="grid grid-4 mb-8" style="max-width: 1200px; margin: 0 auto;">
-                    <div class="card gradient-dark">
-                        <div class="card-header">
-                            <h3 class="card-subtitle" style="color: rgba(255,255,255,0.9); margin: 0;">
-                                <i class="fas fa-trending-up w-4 h-4"></i> Saldo Atual
-                            </h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="text-2xl font-bold" id="homeSaldoAtual">R$ 0,00</div>
-                            <p style="font-size: 12px; opacity: 0.75; margin-top: 4px;">Entradas - Saídas</p>
-                        </div>
+            <button id="mobileSidebarToggle" class="hamburger-menu hidden">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <section id="home" class="content-section active">
+                <h2 class="text-3xl font-bold mb-4">Visão Geral</h2>
+                <div class="grid gap-4 md:grid-cols-4">
+                    <div class="p-4 bg-white rounded-lg shadow border text-center">
+                        <p class="text-muted text-sm font-semibold mb-2">Saldo Atual</p>
+                        <p id="homeSaldoAtual" class="text-2xl font-bold text-green-600">R$ 0,00</p>
                     </div>
-
-                    <div class="card gradient-gray">
-                        <div class="card-header">
-                            <h3 class="card-subtitle" style="color: rgba(255,255,255,0.9); margin: 0;">
-                                <i class="fas fa-users w-4 h-4"></i> Total Membros
-                            </h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="text-2xl font-bold" id="homeTotalMembros">0</div>
-                            <p style="font-size: 12px; opacity: 0.75; margin-top: 4px;">Membros ativos</p>
-                        </div>
+                    <div class="p-4 bg-white rounded-lg shadow border text-center">
+                        <p class="text-muted text-sm font-semibold mb-2">Total de Membros</p>
+                        <p id="homeTotalMembros" class="text-2xl font-bold">0</p>
                     </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-subtitle text-muted" style="margin: 0;">
-                                <i class="fas fa-calendar w-4 h-4"></i> Total RCC
-                            </h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="text-2xl font-bold text-slate-700" id="homeTotalRcc">R$ 0,00</div>
-                            <p class="text-muted" style="font-size: 12px; margin-top: 4px;">Contribuições RCC</p>
-                        </div>
+                    <div class="p-4 bg-white rounded-lg shadow border text-center">
+                        <p class="text-muted text-sm font-semibold mb-2">Total de RCC (Geral)</p>
+                        <p id="homeTotalRcc" class="text-xl font-bold text-blue-600">R$ 0,00</p>
                     </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-subtitle text-muted" style="margin: 0;">
-                                <i class="fas fa-piggy-bank w-4 h-4"></i> Total Caixa Extra
-                            </h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="text-2xl font-bold text-slate-600" id="homeTotalCaixaExtra">R$ 0,00</div>
-                            <p class="text-muted" style="font-size: 12px; margin-top: 4px;">Contribuições extras</p>
-                        </div>
+                    <div class="p-4 bg-white rounded-lg shadow border text-center">
+                        <p class="text-muted text-sm font-semibold mb-2">Total de Caixa Extra (Geral)</p>
+                        <p id="homeTotalCaixaExtra" class="text-xl font-bold text-blue-600">R$ 0,00</p>
                     </div>
                 </div>
 
-                <!-- Cards de Informação -->
-                <div class="grid grid-2 mb-8" style="max-width: 1200px; margin: 0 auto;">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title font-serif">Sobre o Sistema</h3>
+                <div class="mt-8 p-4 bg-white rounded-lg shadow border">
+                    <h3 class="text-xl font-semibold mb-4">Atividades Recentes</h3>
+                    <div id="recentActivities">
                         </div>
-                        <div class="card-content">
-                            <p class="text-muted mb-4">
-                                Este sistema foi desenvolvido especialmente para auxiliar no controle financeiro 
-                                do nosso grupo de oração, permitindo:
-                            </p>
-                            <ul style="list-style: none; padding: 0;">
-                                <li class="flex items-center gap-2 mb-2">
-                                    <div style="width: 8px; height: 8px; background: hsl(0 0% 15%); border-radius: 50%; flex-shrink: 0;"></div>
-                                    <span class="text-muted">Registro de entradas e saídas na tesouraria</span>
-                                </li>
-                                <li class="flex items-center gap-2 mb-2">
-                                    <div style="width: 8px; height: 8px; background: hsl(0 0% 15%); border-radius: 50%; flex-shrink: 0;"></div>
-                                    <span class="text-muted">Controle das contribuições RCC e caixa extra dos membros</span>
-                                </li>
-                                <li class="flex items-center gap-2 mb-2">
-                                    <div style="width: 8px; height: 8px; background: hsl(0 0% 15%); border-radius: 50%; flex-shrink: 0;"></div>
-                                    <span class="text-muted">Relatórios mensais e anuais completos</span>
-                                </li>
-                                <li class="flex items-center gap-2">
-                                    <div style="width: 8px; height: 8px; background: hsl(0 0% 15%); border-radius: 50%; flex-shrink: 0;"></div>
-                                    <span class="text-muted">Acompanhamento de saldo e balanço financeiro</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title font-serif">Como Usar</h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="flex items-start gap-3 mb-3">
-                                <div class="w-6 h-6 gradient-dark text-center rounded-full flex items-center justify-center font-bold" style="color: white; font-size: 14px; flex-shrink: 0; margin-top: 2px;">1</div>
-                                <div>
-                                    <h4 class="font-medium">Tesouraria</h4>
-                                    <p class="text-muted" style="font-size: 14px;">Registre todas as entradas e saídas do caixa do grupo</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start gap-3 mb-3">
-                                <div class="w-6 h-6 gradient-dark text-center rounded-full flex items-center justify-center font-bold" style="color: white; font-size: 14px; flex-shrink: 0; margin-top: 2px;">2</div>
-                                <div>
-                                    <h4 class="font-medium">Membros</h4>
-                                    <p class="text-muted" style="font-size: 14px;">Gerencie os membros e suas contribuições mensais</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start gap-3">
-                                <div class="w-6 h-6 gradient-dark text-center rounded-full flex items-center justify-center font-bold" style="color: white; font-size: 14px; flex-shrink: 0; margin-top: 2px;">3</div>
-                                <div>
-                                    <h4 class="font-medium">Contabilidade</h4>
-                                    <p class="text-muted" style="font-size: 14px;">Visualize relatórios e balanços mensais e anuais</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Atividades Recentes -->
-                <div class="card" style="max-width: 1200px; margin: 0 auto;">
-                    <div class="card-header">
-                        <h3 class="card-title font-serif">Atividades Recentes</h3>
-                    </div>
-                    <div class="card-content">
-                        <div id="recentActivities">
-                            <p class="text-center text-muted py-8">Nenhuma atividade registrada ainda</p>
-                        </div>
-                    </div>
                 </div>
             </section>
 
-            <!-- Tesouraria Section -->
-            <section class="content-section" id="tesouraria">
-                <div class="text-center mb-8">
-                    <h1 class="text-3xl font-serif font-bold mb-2" style="color: hsl(0 0% 15%);">Tesouraria</h1>
-                    <p class="text-muted">Controle de entradas e saídas do grupo</p>
-                </div>
-
-                <!-- Cards de Resumo -->
-                <div class="grid grid-3 mb-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-subtitle text-muted flex items-center gap-2" style="margin: 0;">
-                                <i class="fas fa-trending-up text-green-600"></i> Total Entradas
-                            </h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="text-2xl font-bold text-green-600" id="totalEntradas">R$ 0,00</div>
-                        </div>
+            <section id="tesouraria" class="content-section">
+                <h2 class="text-3xl font-bold mb-4">Tesouraria</h2>
+                <div class="grid gap-4 md:grid-cols-3">
+                    <div class="p-4 bg-white rounded-lg shadow border text-center">
+                        <p class="text-muted text-sm font-semibold mb-2">Total de Entradas</p>
+                        <p id="totalEntradas" class="text-2xl font-bold text-green-600">R$ 0,00</p>
                     </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-subtitle text-muted flex items-center gap-2" style="margin: 0;">
-                                <i class="fas fa-trending-down text-red-600"></i> Total Saídas
-                            </h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="text-2xl font-bold text-red-600" id="totalSaidas">R$ 0,00</div>
-                        </div>
+                    <div class="p-4 bg-white rounded-lg shadow border text-center">
+                        <p class="text-muted text-sm font-semibold mb-2">Total de Saídas</p>
+                        <p id="totalSaidas" class="text-2xl font-bold text-red-600">R$ 0,00</p>
                     </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-subtitle text-muted" style="margin: 0;">Saldo Atual</h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="text-2xl font-bold" id="saldoAtual">R$ 0,00</div>
-                        </div>
+                    <div class="p-4 bg-white rounded-lg shadow border text-center">
+                        <p class="text-muted text-sm font-semibold mb-2">Saldo Atual</p>
+                        <p id="saldoAtual" class="text-2xl font-bold">R$ 0,00</p>
                     </div>
                 </div>
 
-                <div class="grid grid-2">
-                    <!-- Formulário -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-plus"></i> Nova Transação
-                            </h3>
-                        </div>
-                        <div class="card-content">
-                            <form class="form" id="transactionForm">
-                                <div class="form-group">
-                                    <label class="form-label">Tipo *</label>
-                                    <select class="form-select" id="transactionType" required>
-                                        <option value="entrada">Entrada</option>
-                                        <option value="saida">Saída</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">Descrição *</label>
-                                    <textarea class="form-textarea" id="transactionDescription" placeholder="Descrição da transação" required></textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">Valor (R$) *</label>
-                                    <input type="number" class="form-input" id="transactionAmount" step="0.01" placeholder="0,00" required>
-                                </div>
-
-                                <div class="grid grid-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Mês</label>
-                                        <select class="form-select" id="transactionMonth">
-                                            <option value="1">Janeiro</option>
-                                            <option value="2">Fevereiro</option>
-                                            <option value="3">Março</option>
-                                            <option value="4">Abril</option>
-                                            <option value="5">Maio</option>
-                                            <option value="6">Junho</option>
-                                            <option value="7">Julho</option>
-                                            <option value="8">Agosto</option>
-                                            <option value="9">Setembro</option>
-                                            <option value="10">Outubro</option>
-                                            <option value="11">Novembro</option>
-                                            <option value="12">Dezembro</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="form-label">Ano</label>
-                                        <select class="form-select" id="transactionYear"></select>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">Data</label>
-                                    <input type="date" class="form-input" id="transactionDate">
-                                </div>
-
-                                <button type="submit" class="btn btn-primary btn-full">
-                                    Registrar Transação
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Histórico -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Histórico Recente</h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="table-container">
-                                <div id="transactionHistory">
-                                    <p class="text-center text-muted py-8">Nenhuma transação registrada ainda</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Membros Section -->
-            <section class="content-section" id="membros">
-                <div class="text-center mb-8">
-                    <h1 class="text-3xl font-serif font-bold mb-2" style="color: hsl(0 0% 15%);">Membros do Grupo</h1>
-                    <p class="text-muted">Gerenciamento de membros e contribuições</p>
-                </div>
-
-                <!-- Seletor de Mês/Ano e Totais -->
-                <div class="grid grid-4 mb-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-subtitle text-muted" style="margin: 0;">Mês/Ano</h3>
-                        </div>
-                        <div class="card-content">
-                            <div style="display: flex; flex-direction: column; gap: 12px;">
-                                <select class="form-select" id="membersMonth">
-                                    <option value="1">Janeiro</option>
-                                    <option value="2">Fevereiro</option>
-                                    <option value="3">Março</option>
-                                    <option value="4">Abril</option>
-                                    <option value="5">Maio</option>
-                                    <option value="6">Junho</option>
-                                    <option value="7">Julho</option>
-                                    <option value="8">Agosto</option>
-                                    <option value="9">Setembro</option>
-                                    <option value="10">Outubro</option>
-                                    <option value="11">Novembro</option>
-                                    <option value="12">Dezembro</option>
+                <div class="mt-8 p-4 bg-white rounded-lg shadow border">
+                    <h3 class="text-xl font-semibold mb-4">Adicionar Transação</h3>
+                    <form id="transactionForm" class="grid gap-4">
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <div class="form-group">
+                                <label for="transactionType" class="text-sm font-medium">Tipo</label>
+                                <select id="transactionType" class="form-select w-full">
+                                    <option value="entrada">Entrada</option>
+                                    <option value="saida">Saída</option>
                                 </select>
-                                <select class="form-select" id="membersYear"></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="transactionAmount" class="text-sm font-medium">Valor (R$)</label>
+                                <input type="number" id="transactionAmount" class="form-input w-full" step="0.01" required>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-subtitle text-muted flex items-center gap-2" style="margin: 0;">
-                                <i class="fas fa-users"></i> Total Membros
-                            </h3>
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <div class="form-group">
+                                <label for="transactionDate" class="text-sm font-medium">Data</label>
+                                <input type="date" id="transactionDate" class="form-input w-full" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="memberSelect" class="text-sm font-medium">Membro</label>
+                                <select id="memberSelect" class="form-select w-full">
+                                    <option value="">Nenhum</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="card-content">
-                            <div class="text-2xl font-bold" style="color: hsl(0 0% 15%);" id="totalMembrosCount">0</div>
+                        <div class="form-group">
+                            <label for="transactionDescription" class="text-sm font-medium">Descrição</label>
+                            <textarea id="transactionDescription" class="form-input w-full" rows="2" required></textarea>
                         </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-subtitle text-muted" style="margin: 0;">Total RCC</h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="text-2xl font-bold text-slate-700" id="totalRccMes">R$ 0,00</div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-subtitle text-muted" style="margin: 0;">Total Caixa Extra</h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="text-2xl font-bold text-slate-600" id="totalCaixaExtraMes">R$ 0,00</div>
-                        </div>
-                    </div>
+                        <button type="submit" class="btn w-full">Adicionar Transação</button>
+                    </form>
                 </div>
 
-                <div class="grid grid-1" style="grid-template-columns: 300px 1fr; gap: 24px;">
-                    <!-- Formulário para Adicionar Membro -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-plus"></i> Adicionar Membro
-                            </h3>
+                <div class="mt-8 p-4 bg-white rounded-lg shadow border">
+                    <h3 class="text-xl font-semibold mb-4">Histórico de Transações</h3>
+                    <div id="transactionHistory">
                         </div>
-                        <div class="card-content">
-                            <form class="form" id="memberForm">
-                                <div class="form-group">
-                                    <label class="form-label">Nome do Membro</label>
-                                    <input type="text" class="form-input" id="memberName" placeholder="Digite o nome completo" required>
-                                </div>
-                                <button type="submit" class="btn btn-primary btn-full">
-                                    Adicionar Membro
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Lista de Membros -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Membros - <span id="currentMonthYear">Janeiro 2025</span></h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="table-container">
-                                <div id="membersTable">
-                                    <p class="text-center text-muted py-8">Nenhum membro cadastrado</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </section>
 
-            <!-- Contabilidade Section -->
-            <section class="content-section" id="contabilidade">
-                <div class="text-center mb-8">
-                    <h1 class="text-3xl font-serif font-bold mb-2" style="color: hsl(0 0% 15%);">Contabilidade</h1>
-                    <p class="text-muted">Balanço financeiro e relatórios anuais</p>
-                </div>
-
-                <!-- Seletor de Ano -->
-                <div class="flex justify-center mb-6">
-                    <div class="card" style="width: 200px;">
-                        <div class="card-header">
-                            <h3 class="card-subtitle text-muted text-center" style="margin: 0;">Selecionar Ano</h3>
-                        </div>
-                        <div class="card-content">
-                            <select class="form-select" id="contabilidadeYear"></select>
-                        </div>
+            <section id="membros" class="content-section">
+                <h2 class="text-3xl font-bold mb-4">Membros</h2>
+                <div class="grid gap-4 md:grid-cols-3">
+                    <div class="p-4 bg-white rounded-lg shadow border text-center">
+                        <p class="text-muted text-sm font-semibold mb-2">Total de Membros</p>
+                        <p id="totalMembrosCount" class="text-2xl font-bold">0</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-lg shadow border text-center">
+                        <p class="text-muted text-sm font-semibold mb-2">Total de RCC (mês)</p>
+                        <p id="totalRccMes" class="text-xl font-bold text-blue-600">R$ 0,00</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-lg shadow border text-center">
+                        <p class="text-muted text-sm font-semibold mb-2">Total de Caixa Extra (mês)</p>
+                        <p id="totalCaixaExtraMes" class="text-xl font-bold text-blue-600">R$ 0,00</p>
                     </div>
                 </div>
 
-                <!-- Resumo Anual -->
-                <div class="grid grid-5 mb-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-subtitle text-muted flex items-center gap-2" style="margin: 0;">
-                                <i class="fas fa-trending-up text-green-600"></i> Entradas Totais
-                            </h3>
+                <div class="mt-8 p-4 bg-white rounded-lg shadow border">
+                    <h3 class="text-xl font-semibold mb-4">Adicionar Novo Membro</h3>
+                    <form id="memberForm" class="flex gap-2">
+                        <div class="form-group w-full">
+                            <label for="memberName" class="text-sm font-medium">Nome do Membro</label>
+                            <input type="text" id="memberName" class="form-input w-full" required>
                         </div>
-                        <div class="card-content">
-                            <div class="text-xl font-bold text-green-600" id="yearlyEntradas">R$ 0,00</div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-subtitle text-muted flex items-center gap-2" style="margin: 0;">
-                                <i class="fas fa-dollar-sign text-slate-700"></i> RCC Total
-                            </h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="text-xl font-bold text-slate-700" id="yearlyRcc">R$ 0,00</div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-subtitle text-muted flex items-center gap-2" style="margin: 0;">
-                                <i class="fas fa-piggy-bank text-slate-600"></i> Caixa Extra Total
-                            </h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="text-xl font-bold text-slate-600" id="yearlyCaixaExtra">R$ 0,00</div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-subtitle text-muted flex items-center gap-2" style="margin: 0;">
-                                <i class="fas fa-trending-down text-red-600"></i> Saídas Totais
-                            </h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="text-xl font-bold text-red-600" id="yearlySaidas">R$ 0,00</div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-subtitle text-muted flex items-center gap-2" style="margin: 0;">
-                                <i class="fas fa-chart-bar"></i> Saldo Final
-                            </h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="text-xl font-bold" id="yearlyBalance">R$ 0,00</div>
-                        </div>
-                    </div>
+                        <button type="submit" class="btn py-2 px-4 self-end">Adicionar</button>
+                    </form>
                 </div>
 
-                <!-- Relatório Mensal -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-chart-bar"></i> Relatório Mensal - <span id="reportYear">2025</span>
-                        </h3>
-                    </div>
-                    <div class="card-content">
-                        <div id="monthlyReport">
-                            <div class="empty-state">
-                                <i class="fas fa-chart-bar empty-icon"></i>
-                                <p class="text-lg font-medium text-muted mb-2">Nenhum dado encontrado</p>
-                                <p class="text-muted">Registre transações e contribuições dos membros para ver os relatórios aqui.</p>
-                            </div>
+                <div class="mt-8 p-4 bg-white rounded-lg shadow border">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold">Contribuições - <span id="currentMonthYear"></span></h3>
+                        <div class="flex gap-2">
+                            <select id="membersMonth" class="form-select w-24"></select>
+                            <select id="membersYear" class="form-select w-24"></select>
                         </div>
                     </div>
+                    <div id="membersTable" class="table-responsive">
+                        </div>
                 </div>
             </section>
+
+            <section id="contabilidade" class="content-section">
+                <h2 class="text-3xl font-bold mb-4">Contabilidade</h2>
+                <div class="flex items-center gap-4 mb-8">
+                    <h3 class="text-xl font-semibold">Relatório Anual - <span id="reportYear"></span></h3>
+                    <select id="contabilidadeYear" class="form-select w-24"></select>
+                </div>
+                
+                <div class="grid gap-4 md:grid-cols-5 mb-8">
+                    <div class="p-4 bg-white rounded-lg shadow border text-center">
+                        <p class="text-muted text-sm font-semibold mb-2">Entradas</p>
+                        <p id="yearlyEntradas" class="text-lg font-bold text-green-600">R$ 0,00</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-lg shadow border text-center">
+                        <p class="text-muted text-sm font-semibold mb-2">RCC</p>
+                        <p id="yearlyRcc" class="text-lg font-bold text-blue-600">R$ 0,00</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-lg shadow border text-center">
+                        <p class="text-muted text-sm font-semibold mb-2">Caixa Extra</p>
+                        <p id="yearlyCaixaExtra" class="text-lg font-bold text-blue-600">R$ 0,00</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-lg shadow border text-center">
+                        <p class="text-muted text-sm font-semibold mb-2">Saídas</p>
+                        <p id="yearlySaidas" class="text-lg font-bold text-red-600">R$ 0,00</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-lg shadow border text-center">
+                        <p class="text-muted text-sm font-semibold mb-2">Saldo</p>
+                        <p id="yearlyBalance" class="text-xl font-bold">R$ 0,00</p>
+                    </div>
+                </div>
+
+                <div id="monthlyReport" class="p-4 bg-white rounded-lg shadow border">
+                    </div>
+            </section>
+
         </main>
     </div>
 
-    <!-- Modal para confirmar remoção de membro -->
-    <div class="modal" id="confirmModal">
+    <div id="confirmModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Remover Membro</h3>
-            </div>
-            <div class="modal-body">
-                <p id="confirmText"></p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelBtn">Cancelar</button>
-                <button class="btn btn-danger" id="confirmBtn">Remover</button>
+            <h4 class="text-xl font-semibold mb-4">Confirmação</h4>
+            <p id="confirmText" class="text-muted mb-4"></p>
+            <div class="modal-buttons">
+                <button id="cancelBtn" class="btn bg-gray-200 text-gray-800">Cancelar</button>
+                <button id="confirmBtn" class="btn bg-red-600 text-white">Confirmar</button>
             </div>
         </div>
     </div>
 
-    <script>
-        // Sistema de dados local
+    <script type="module">
+        // Importar as bibliotecas do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, onSnapshot, doc, deleteDoc, updateDoc, query, where, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Sua configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyA4ojfhf2r65ch0KwtCLR4OGdesBBVl7Ok",
+            authDomain: "tesouraria-17927.firebaseapp.com",
+            projectId: "tesouraria-17927",
+            storageBucket: "tesouraria-17927.firebasestorage.app",
+            messagingSenderId: "618185390033",
+            appId: "1:618185390033:web:53b6f976ca66f48edd52f0"
+        };
+
+        // Inicializar Firebase e Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Funções utilitárias
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp || !timestamp.toDate) return '';
+            const date = timestamp.toDate();
+            return date.toLocaleDateString('pt-BR');
+        }
+
         class DataManager {
             constructor() {
-                this.transactions = this.loadData('grupo-oracao-transactions', []);
-                this.members = this.loadData('grupo-oracao-members', this.getInitialMembers());
+                this.transactionsCollection = collection(db, 'transactions');
+                this.membersCollection = collection(db, 'members');
+                this.currentTransactions = [];
+                this.currentMembers = [];
+                this.callbacks = [];
+                this.initListeners();
             }
 
-            loadData(key, defaultValue) {
-                const stored = localStorage.getItem(key);
-                return stored ? JSON.parse(stored) : defaultValue;
+            // Adiciona um listener em tempo real para as coleções
+            initListeners() {
+                // Listener para transações
+                onSnapshot(query(this.transactionsCollection, orderBy('date', 'desc')), (snapshot) => {
+                    this.currentTransactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    this.triggerUpdate();
+                });
+
+                // Listener para membros
+                onSnapshot(this.membersCollection, (snapshot) => {
+                    this.currentMembers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    this.triggerUpdate();
+                });
             }
 
-            saveData(key, data) {
-                localStorage.setItem(key, JSON.stringify(data));
+            addCallback(callback) {
+                this.callbacks.push(callback);
             }
 
-            getInitialMembers() {
-                const memberNames = [
-                    'LUCAS NICOLAS', 'MILENA', 'TELMIRA', 'HENRIQUE', 'ROBERTA', 'NOEMI',
-                    'VERA', 'MARLY', 'FLAVIO', 'ENIO', 'JESSICA', 'MARIA LIMA',
-                    'MARIA DE JESUS', 'ELISANGELA', 'GERALDA', 'LUCAS OLIVEIRA'
-                ];
-
-                return memberNames.map((name, index) => ({
-                    id: `member-${index}`,
-                    name,
-                    rcc: {},
-                    caixaExtra: {}
-                }));
+            triggerUpdate() {
+                if (this.currentTransactions && this.currentMembers) {
+                    this.callbacks.forEach(callback => callback(this.currentTransactions, this.currentMembers));
+                }
             }
-
-            addTransaction(transaction) {
-                const newTransaction = {
+            
+            async addTransaction(transaction) {
+                const docRef = await addDoc(this.transactionsCollection, {
                     ...transaction,
-                    id: Date.now().toString()
-                };
-                this.transactions.push(newTransaction);
-                this.saveData('grupo-oracao-transactions', this.transactions);
-                return newTransaction;
+                    date: new Date(transaction.date)
+                });
+                return docRef.id;
             }
 
-            addMember(name) {
-                const newMember = {
-                    id: `member-${Date.now()}`,
-                    name: name.toUpperCase(),
-                    rcc: {},
-                    caixaExtra: {}
-                };
-                this.members.push(newMember);
-                this.saveData('grupo-oracao-members', this.members);
-                return newMember;
+            async deleteTransaction(id) {
+                const docRef = doc(this.transactionsCollection, id);
+                await deleteDoc(docRef);
             }
 
-            removeMember(id) {
-                this.members = this.members.filter(member => member.id !== id);
-                this.saveData('grupo-oracao-members', this.members);
+            async addMember(name) {
+                // Checa se já existe um membro com o mesmo nome para evitar duplicatas
+                const membersQuery = await getDocs(query(this.membersCollection, where("name", "==", name.toUpperCase())));
+                if (membersQuery.empty) {
+                    const docRef = await addDoc(this.membersCollection, { name: name.toUpperCase(), rcc: {}, caixaExtra: {} });
+                    return docRef.id;
+                }
+                return null;
+            }
+            
+            async deleteMember(id) {
+                const docRef = doc(this.membersCollection, id);
+                await deleteDoc(docRef);
             }
 
-            updateMemberValue(memberId, type, yearMonth, value) {
-                const member = this.members.find(m => m.id === memberId);
-                if (member) {
-                    member[type][yearMonth] = value;
-                    this.saveData('grupo-oracao-members', this.members);
+            async updateMemberValue(memberId, type, yearMonth, value) {
+                const docRef = doc(this.membersCollection, memberId);
+                const memberDoc = await getDoc(docRef);
+                if (memberDoc.exists()) {
+                    const memberData = memberDoc.data();
+                    const updatedField = {
+                        [`${type}.${yearMonth}`]: parseFloat(value) || 0
+                    };
+                    await updateDoc(docRef, updatedField);
                 }
             }
 
-            getMonthlyData(year) {
+            getMonthlyData(year, transactions, members) {
                 const data = [];
                 const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
                               'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
                 for (let month = 1; month <= 12; month++) {
-                    const monthTransactions = this.transactions.filter(t => t.year === year && t.month === month);
+                    const monthTransactions = transactions.filter(t => {
+                        const transactionDate = t.date.toDate();
+                        return transactionDate.getFullYear() === year && transactionDate.getMonth() + 1 === month;
+                    });
+                    
                     const totalEntradas = monthTransactions.filter(t => t.type === 'entrada').reduce((sum, t) => sum + t.amount, 0);
                     const totalSaidas = monthTransactions.filter(t => t.type === 'saida').reduce((sum, t) => sum + t.amount, 0);
                     
                     const yearMonth = `${year}-${month}`;
-                    const totalRcc = this.members.reduce((sum, member) => sum + (member.rcc[yearMonth] || 0), 0);
-                    const totalCaixaExtra = this.members.reduce((sum, member) => sum + (member.caixaExtra[yearMonth] || 0), 0);
+                    const totalRcc = members.reduce((sum, member) => sum + (member.rcc[yearMonth] || 0), 0);
+                    const totalCaixaExtra = members.reduce((sum, member) => sum + (member.caixaExtra[yearMonth] || 0), 0);
                     
                     const balance = (totalEntradas + totalRcc) - totalSaidas;
                     
@@ -1213,7 +604,6 @@
             }
         }
 
-        // Sistema de navegação
         class NavigationManager {
             constructor(dataManager) {
                 this.dataManager = dataManager;
@@ -1244,9 +634,6 @@
                 document.getElementById('mobileSidebarToggle').addEventListener('click', () => {
                     document.getElementById('sidebar').classList.toggle('open');
                 });
-
-                // Inicializar seção home
-                this.showSection('home');
             }
 
             showSection(sectionName) {
@@ -1259,61 +646,62 @@
                 document.getElementById(sectionName).classList.add('active');
 
                 // Atualizar navegação
-                document.querySelectorAll('.sidebar-menu-link, .sidebar-brand').forEach(link => {
+                document.querySelectorAll('.sidebar-menu-link').forEach(link => {
                     link.classList.remove('active');
                 });
 
                 if (sectionName === 'home') {
-                    document.getElementById('homeLink').classList.add('active');
+                    document.querySelector(`[data-section="home"]`).classList.add('active');
                 } else {
                     document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
                 }
-
+                
+                // Fechar sidebar no mobile
+                document.getElementById('sidebar').classList.remove('open');
+                
                 this.currentSection = sectionName;
-
-                // Atualizar dados da seção
-                this.updateSectionData(sectionName);
+                this.dataManager.triggerUpdate(); // Força a atualização da seção
             }
 
-            updateSectionData(sectionName) {
-                switch (sectionName) {
+            updateSectionData(transactions, members) {
+                switch (this.currentSection) {
                     case 'home':
-                        this.updateHomeData();
+                        this.updateHomeData(transactions, members);
                         break;
                     case 'tesouraria':
-                        this.updateTesourariaData();
+                        this.updateTesourariaData(transactions, members);
                         break;
                     case 'membros':
-                        this.updateMembrosData();
+                        this.updateMembrosData(transactions, members);
                         break;
                     case 'contabilidade':
-                        this.updateContabilidadeData();
+                        this.updateContabilidadeData(transactions, members);
                         break;
                 }
             }
 
-            updateHomeData() {
-                const totalEntradas = this.dataManager.transactions.filter(t => t.type === 'entrada').reduce((sum, t) => sum + t.amount, 0);
-                const totalSaidas = this.dataManager.transactions.filter(t => t.type === 'saida').reduce((sum, t) => sum + t.amount, 0);
+            updateHomeData(transactions, members) {
+                const totalEntradas = transactions.filter(t => t.type === 'entrada').reduce((sum, t) => sum + t.amount, 0);
+                const totalSaidas = transactions.filter(t => t.type === 'saida').reduce((sum, t) => sum + t.amount, 0);
                 const saldoAtual = totalEntradas - totalSaidas;
-                
-                const totalRccGeral = this.dataManager.members.reduce((sum, member) => {
+
+                const totalRccGeral = members.reduce((sum, member) => {
                     return sum + Object.values(member.rcc).reduce((memberSum, value) => memberSum + value, 0);
                 }, 0);
-                
-                const totalCaixaExtraGeral = this.dataManager.members.reduce((sum, member) => {
+
+                const totalCaixaExtraGeral = members.reduce((sum, member) => {
                     return sum + Object.values(member.caixaExtra).reduce((memberSum, value) => memberSum + value, 0);
                 }, 0);
 
-                document.getElementById('homeSaldoAtual').textContent = `R$ ${saldoAtual.toFixed(2)}`;
-                document.getElementById('homeTotalMembros').textContent = this.dataManager.members.length;
-                document.getElementById('homeTotalRcc').textContent = `R$ ${totalRccGeral.toFixed(2)}`;
-                document.getElementById('homeTotalCaixaExtra').textContent = `R$ ${totalCaixaExtraGeral.toFixed(2)}`;
+                document.getElementById('homeSaldoAtual').textContent = formatCurrency(saldoAtual);
+                document.getElementById('homeTotalMembros').textContent = members.length;
+                document.getElementById('homeTotalRcc').textContent = formatCurrency(totalRccGeral);
+                document.getElementById('homeTotalCaixaExtra').textContent = formatCurrency(totalCaixaExtraGeral);
 
                 // Atividades recentes
-                const recentTransactions = this.dataManager.transactions.slice(-5).reverse();
+                const recentTransactions = transactions.slice(0, 5);
                 const recentActivitiesElement = document.getElementById('recentActivities');
-                
+
                 if (recentTransactions.length === 0) {
                     recentActivitiesElement.innerHTML = '<p class="text-center text-muted py-8">Nenhuma atividade registrada ainda</p>';
                 } else {
@@ -1323,31 +711,31 @@
                                 <div class="w-2 h-2 rounded-full" style="background: ${transaction.type === 'entrada' ? '#22c55e' : '#ef4444'};"></div>
                                 <div>
                                     <p class="font-medium" style="font-size: 14px;">${transaction.description}</p>
-                                    <p class="text-muted" style="font-size: 12px;">${new Date(transaction.date).toLocaleDateString('pt-BR')}</p>
+                                    <p class="text-muted" style="font-size: 12px;">${formatDate(transaction.date)}</p>
                                 </div>
                             </div>
                             <div class="font-bold ${transaction.type === 'entrada' ? 'text-green-600' : 'text-red-600'}">
-                                ${transaction.type === 'entrada' ? '+' : '-'}R$ ${transaction.amount.toFixed(2)}
+                                ${transaction.type === 'entrada' ? '+' : '-'}${formatCurrency(transaction.amount)}
                             </div>
                         </div>
                     `).join('');
                 }
             }
 
-            updateTesourariaData() {
-                const totalEntradas = this.dataManager.transactions.filter(t => t.type === 'entrada').reduce((sum, t) => sum + t.amount, 0);
-                const totalSaidas = this.dataManager.transactions.filter(t => t.type === 'saida').reduce((sum, t) => sum + t.amount, 0);
+            updateTesourariaData(transactions, members) {
+                const totalEntradas = transactions.filter(t => t.type === 'entrada').reduce((sum, t) => sum + t.amount, 0);
+                const totalSaidas = transactions.filter(t => t.type === 'saida').reduce((sum, t) => sum + t.amount, 0);
                 const saldo = totalEntradas - totalSaidas;
 
-                document.getElementById('totalEntradas').textContent = `R$ ${totalEntradas.toFixed(2)}`;
-                document.getElementById('totalSaidas').textContent = `R$ ${totalSaidas.toFixed(2)}`;
-                document.getElementById('saldoAtual').textContent = `R$ ${saldo.toFixed(2)}`;
+                document.getElementById('totalEntradas').textContent = formatCurrency(totalEntradas);
+                document.getElementById('totalSaidas').textContent = formatCurrency(totalSaidas);
+                document.getElementById('saldoAtual').textContent = formatCurrency(saldo);
                 document.getElementById('saldoAtual').className = `text-2xl font-bold ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}`;
 
                 // Histórico
                 const historyElement = document.getElementById('transactionHistory');
-                const recentTransactions = this.dataManager.transactions.slice(-10).reverse();
-                
+                const recentTransactions = transactions.slice(0, 10);
+
                 if (recentTransactions.length === 0) {
                     historyElement.innerHTML = '<p class="text-center text-muted py-8">Nenhuma transação registrada ainda</p>';
                 } else {
@@ -1360,59 +748,69 @@
                                 </div>
                                 <p class="text-muted" style="font-size: 14px;">${transaction.description}</p>
                                 <p class="text-muted" style="font-size: 12px;">
-                                    ${new Date(transaction.date).toLocaleDateString('pt-BR')} • ${this.getMonthName(transaction.month)} ${transaction.year}
+                                    ${formatDate(transaction.date)}
                                 </p>
                             </div>
                             <div class="font-bold ${transaction.type === 'entrada' ? 'text-green-600' : 'text-red-600'}">
-                                ${transaction.type === 'entrada' ? '+' : '-'}R$ ${transaction.amount.toFixed(2)}
+                                ${transaction.type === 'entrada' ? '+' : '-'}${formatCurrency(transaction.amount)}
                             </div>
                         </div>
                     `).join('');
                 }
+                
+                // Popula o select de membros
+                const memberSelect = document.getElementById('memberSelect');
+                memberSelect.innerHTML = `<option value="">Nenhum</option>`;
+                members.forEach(member => {
+                    const option = document.createElement('option');
+                    option.value = member.id;
+                    option.textContent = member.name;
+                    memberSelect.appendChild(option);
+                });
             }
 
-            updateMembrosData() {
+            updateMembrosData(transactions, members) {
                 const selectedMonth = parseInt(document.getElementById('membersMonth').value);
                 const selectedYear = parseInt(document.getElementById('membersYear').value);
                 const yearMonth = `${selectedYear}-${selectedMonth}`;
 
-                const totalRcc = this.dataManager.members.reduce((sum, member) => sum + (member.rcc[yearMonth] || 0), 0);
-                const totalCaixaExtra = this.dataManager.members.reduce((sum, member) => sum + (member.caixaExtra[yearMonth] || 0), 0);
+                const totalRcc = members.reduce((sum, member) => sum + (member.rcc[yearMonth] || 0), 0);
+                const totalCaixaExtra = members.reduce((sum, member) => sum + (member.caixaExtra[yearMonth] || 0), 0);
 
-                document.getElementById('totalMembrosCount').textContent = this.dataManager.members.length;
-                document.getElementById('totalRccMes').textContent = `R$ ${totalRcc.toFixed(2)}`;
-                document.getElementById('totalCaixaExtraMes').textContent = `R$ ${totalCaixaExtra.toFixed(2)}`;
+                document.getElementById('totalMembrosCount').textContent = members.length;
+                document.getElementById('totalRccMes').textContent = formatCurrency(totalRcc);
+                document.getElementById('totalCaixaExtraMes').textContent = formatCurrency(totalCaixaExtra);
                 document.getElementById('currentMonthYear').textContent = `${this.getMonthName(selectedMonth)} ${selectedYear}`;
 
                 // Tabela de membros
                 const membersTableElement = document.getElementById('membersTable');
-                
-                if (this.dataManager.members.length === 0) {
+
+                if (members.length === 0) {
                     membersTableElement.innerHTML = '<p class="text-center text-muted py-8">Nenhum membro cadastrado</p>';
                 } else {
                     const membersTableHTML = `
-                        <div class="grid" style="grid-template-columns: 5fr 3fr 3fr 1fr; gap: 8px; padding: 12px; background: hsl(0 0% 98%); border-radius: 8px; font-weight: 500; font-size: 14px; margin-bottom: 16px;">
+                        <div class="member-grid header">
                             <div>Nome</div>
                             <div class="text-center">RCC (R$)</div>
                             <div class="text-center">Caixa Extra (R$)</div>
                             <div class="text-center">Ações</div>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 8px;">
-                            ${this.dataManager.members.map(member => `
-                                <div class="grid" style="grid-template-columns: 5fr 3fr 3fr 1fr; gap: 8px; padding: 12px; border: 1px solid hsl(0 0% 90%); border-radius: 8px; align-items: center;">
-                                    <div class="font-medium" style="font-size: 14px;">${member.name}</div>
+                            ${members.map(member => `
+                                <div class="member-grid" style="align-items: center;">
+                                    <div class="font-medium name" style="font-size: 14px;">${member.name}</div>
                                     <div>
-                                        <input type="number" step="0.01" value="${member.rcc[yearMonth] || 0}" 
+                                        <input type="number" step="0.01" value="${member.rcc[yearMonth] || 0}"
                                                class="form-input text-center" style="height: 32px;"
                                                onchange="app.updateMemberValue('${member.id}', 'rcc', '${yearMonth}', this.value)">
                                     </div>
                                     <div>
-                                        <input type="number" step="0.01" value="${member.caixaExtra[yearMonth] || 0}" 
+                                        <input type="number" step="0.01" value="${member.caixaExtra[yearMonth] || 0}"
                                                class="form-input text-center" style="height: 32px;"
                                                onchange="app.updateMemberValue('${member.id}', 'caixaExtra', '${yearMonth}', this.value)">
                                     </div>
-                                    <div class="flex justify-center">
-                                        <button class="btn btn-sm text-red-600" style="background: none; padding: 4px 8px;" 
+                                    <div class="flex justify-center actions">
+                                        <button class="btn btn-sm text-red-600" style="background: none; padding: 4px 8px;"
                                                 onclick="app.confirmRemoveMember('${member.id}', '${member.name}')">
                                             <i class="fas fa-trash" style="font-size: 14px;"></i>
                                         </button>
@@ -1425,11 +823,11 @@
                 }
             }
 
-            updateContabilidadeData() {
+            updateContabilidadeData(transactions, members) {
                 const selectedYear = parseInt(document.getElementById('contabilidadeYear').value);
                 document.getElementById('reportYear').textContent = selectedYear;
 
-                const monthlyData = this.dataManager.getMonthlyData(selectedYear);
+                const monthlyData = this.dataManager.getMonthlyData(selectedYear, transactions, members);
                 const yearlyTotals = monthlyData.reduce((acc, month) => ({
                     totalEntradas: acc.totalEntradas + month.totalEntradas,
                     totalSaidas: acc.totalSaidas + month.totalSaidas,
@@ -1444,73 +842,54 @@
                     balance: 0
                 });
 
-                document.getElementById('yearlyEntradas').textContent = `R$ ${yearlyTotals.totalEntradas.toFixed(2)}`;
-                document.getElementById('yearlyRcc').textContent = `R$ ${yearlyTotals.totalRcc.toFixed(2)}`;
-                document.getElementById('yearlyCaixaExtra').textContent = `R$ ${yearlyTotals.totalCaixaExtra.toFixed(2)}`;
-                document.getElementById('yearlySaidas').textContent = `R$ ${yearlyTotals.totalSaidas.toFixed(2)}`;
-                document.getElementById('yearlyBalance').textContent = `R$ ${yearlyTotals.balance.toFixed(2)}`;
+                document.getElementById('yearlyEntradas').textContent = formatCurrency(yearlyTotals.totalEntradas);
+                document.getElementById('yearlyRcc').textContent = formatCurrency(yearlyTotals.totalRcc);
+                document.getElementById('yearlyCaixaExtra').textContent = formatCurrency(yearlyTotals.totalCaixaExtra);
+                document.getElementById('yearlySaidas').textContent = formatCurrency(yearlyTotals.totalSaidas);
+                document.getElementById('yearlyBalance').textContent = formatCurrency(yearlyTotals.balance);
                 document.getElementById('yearlyBalance').className = `text-xl font-bold ${yearlyTotals.balance >= 0 ? 'text-green-600' : 'text-red-600'}`;
 
                 // Relatório mensal
                 const monthlyReportElement = document.getElementById('monthlyReport');
-                const monthsWithData = monthlyData.filter(month => 
+                const monthsWithData = monthlyData.filter(month =>
                     month.totalEntradas > 0 || month.totalSaidas > 0 || month.totalRcc > 0 || month.totalCaixaExtra > 0
                 );
 
                 if (monthsWithData.length === 0) {
                     monthlyReportElement.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-chart-bar empty-icon"></i>
+                        <div class="empty-state text-center py-10">
+                            <i class="fas fa-chart-bar text-5xl text-muted mb-4"></i>
                             <p class="text-lg font-medium text-muted mb-2">Nenhum dado encontrado para ${selectedYear}</p>
-                            <p class="text-muted">Registre transações e contribuições dos membros para ver os relatórios aqui.</p>
+                            <p class="text-muted text-sm">Registre transações e contribuições dos membros para ver os relatórios aqui.</p>
                         </div>
                     `;
                 } else {
                     const reportHTML = `
-                        <div class="grid" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 8px; padding: 12px; background: hsl(0 0% 98%); border-radius: 8px; font-weight: 500; font-size: 14px; margin-bottom: 16px;">
+                        <div class="grid monthly-report-grid gap-4 p-3 rounded-lg border bg-bg-light font-semibold text-sm mb-4">
                             <div>Mês</div>
                             <div class="text-center">Entradas</div>
+                            <div class="text-center">Saídas</div>
                             <div class="text-center">RCC</div>
                             <div class="text-center">Caixa Extra</div>
-                            <div class="text-center">Saídas</div>
                             <div class="text-center">Saldo</div>
-                            <div class="text-center">Status</div>
                         </div>
-                        <div style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto;">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
                             ${monthsWithData.map(data => `
-                                <div class="grid" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 8px; padding: 12px; border: 1px solid hsl(0 0% 90%); border-radius: 8px; align-items: center;">
-                                    <div class="font-medium">${data.monthName}</div>
-                                    <div class="text-center text-green-600 font-medium">R$ ${data.totalEntradas.toFixed(2)}</div>
-                                    <div class="text-center text-slate-700 font-medium">R$ ${data.totalRcc.toFixed(2)}</div>
-                                    <div class="text-center text-slate-600 font-medium">R$ ${data.totalCaixaExtra.toFixed(2)}</div>
-                                    <div class="text-center text-red-600 font-medium">R$ ${data.totalSaidas.toFixed(2)}</div>
-                                    <div class="text-center font-bold ${data.balance >= 0 ? 'text-green-600' : 'text-red-600'}">R$ ${data.balance.toFixed(2)}</div>
-                                    <div class="text-center">
-                                        <span class="status-badge ${data.balance >= 0 ? 'status-positive' : 'status-negative'}">
-                                            ${data.balance >= 0 ? 'Positivo' : 'Negativo'}
-                                        </span>
-                                    </div>
+                                <div class="grid monthly-report-grid gap-4 p-3 rounded-lg border bg-white items-center">
+                                    <div class="font-medium text-sm">${data.monthName}</div>
+                                    <div class="text-center text-green-600 font-medium">${formatCurrency(data.totalEntradas)}</div>
+                                    <div class="text-center text-red-600 font-medium">${formatCurrency(data.totalSaidas)}</div>
+                                    <div class="text-center text-blue-600 font-medium">${formatCurrency(data.totalRcc)}</div>
+                                    <div class="text-center text-blue-600 font-medium">${formatCurrency(data.totalCaixaExtra)}</div>
+                                    <div class="text-center font-bold ${data.balance >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(data.balance)}</div>
                                 </div>
                             `).join('')}
-                        </div>
-                        <div class="grid" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 8px; padding: 12px; background: rgba(0,0,0,0.05); border-radius: 8px; font-weight: bold; font-size: 14px; border: 2px solid rgba(0,0,0,0.1); margin-top: 16px;">
-                            <div>TOTAL ${selectedYear}</div>
-                            <div class="text-center text-green-600">R$ ${yearlyTotals.totalEntradas.toFixed(2)}</div>
-                            <div class="text-center text-slate-700">R$ ${yearlyTotals.totalRcc.toFixed(2)}</div>
-                            <div class="text-center text-slate-600">R$ ${yearlyTotals.totalCaixaExtra.toFixed(2)}</div>
-                            <div class="text-center text-red-600">R$ ${yearlyTotals.totalSaidas.toFixed(2)}</div>
-                            <div class="text-center ${yearlyTotals.balance >= 0 ? 'text-green-600' : 'text-red-600'}">R$ ${yearlyTotals.balance.toFixed(2)}</div>
-                            <div class="text-center">
-                                <span class="status-badge ${yearlyTotals.balance >= 0 ? 'status-positive' : 'status-negative'}">
-                                    ${yearlyTotals.balance >= 0 ? 'Positivo' : 'Negativo'}
-                                </span>
-                            </div>
                         </div>
                     `;
                     monthlyReportElement.innerHTML = reportHTML;
                 }
             }
-
+            
             getMonthName(monthNumber) {
                 const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
                               'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
@@ -1518,7 +897,6 @@
             }
         }
 
-        // Sistema principal da aplicação
         class FinanceApp {
             constructor() {
                 this.dataManager = new DataManager();
@@ -1531,16 +909,39 @@
                 this.setupForms();
                 this.setupModal();
                 this.setCurrentDate();
+                this.dataManager.addCallback(this.updateUI.bind(this));
+                
+                // Expor funções globais para o HTML
+                window.app = {
+                    updateMemberValue: this.updateMemberValue.bind(this),
+                    confirmRemoveMember: this.confirmRemoveMember.bind(this)
+                };
+            }
+
+            updateUI(transactions, members) {
+                this.navigationManager.updateSectionData(transactions, members);
             }
 
             setupYearSelectors() {
                 const years = Array.from({ length: 26 }, (_, i) => 2025 + i);
                 const currentYear = new Date().getFullYear();
+                const currentMonth = new Date().getMonth() + 1;
 
-                const yearSelectors = ['transactionYear', 'membersYear', 'contabilidadeYear'];
+                const months = [
+                    { value: 1, name: 'Jan' }, { value: 2, name: 'Fev' }, { value: 3, name: 'Mar' },
+                    { value: 4, name: 'Abr' }, { value: 5, name: 'Mai' }, { value: 6, name: 'Jun' },
+                    { value: 7, name: 'Jul' }, { value: 8, name: 'Ago' }, { value: 9, name: 'Set' },
+                    { value: 10, name: 'Out' }, { value: 11, name: 'Nov' }, { value: 12, name: 'Dez' }
+                ];
+                
+                const monthSelector = document.getElementById('membersMonth');
+                monthSelector.innerHTML = months.map(m => `<option value="${m.value}">${m.name}</option>`).join('');
+                monthSelector.value = currentMonth;
+
+                const yearSelectors = ['membersYear', 'contabilidadeYear'];
                 yearSelectors.forEach(selectorId => {
                     const selector = document.getElementById(selectorId);
-                    selector.innerHTML = years.map(year => 
+                    selector.innerHTML = years.map(year =>
                         `<option value="${year}" ${year === currentYear ? 'selected' : ''}>${year}</option>`
                     ).join('');
                 });
@@ -1561,16 +962,16 @@
 
                 // Event listeners para mudança de mês/ano em membros
                 document.getElementById('membersMonth').addEventListener('change', () => {
-                    this.navigationManager.updateMembrosData();
+                    this.updateUI(this.dataManager.currentTransactions, this.dataManager.currentMembers);
                 });
 
                 document.getElementById('membersYear').addEventListener('change', () => {
-                    this.navigationManager.updateMembrosData();
+                    this.updateUI(this.dataManager.currentTransactions, this.dataManager.currentMembers);
                 });
 
                 // Event listener para mudança de ano em contabilidade
                 document.getElementById('contabilidadeYear').addEventListener('change', () => {
-                    this.navigationManager.updateContabilidadeData();
+                    this.updateUI(this.dataManager.currentTransactions, this.dataManager.currentMembers);
                 });
             }
 
@@ -1581,77 +982,48 @@
                     document.getElementById('confirmModal').classList.remove('open');
                 });
 
-                document.getElementById('confirmBtn').addEventListener('click', () => {
+                document.getElementById('confirmBtn').addEventListener('click', async () => {
                     if (this.memberToRemove) {
-                        this.dataManager.removeMember(this.memberToRemove.id);
+                        await this.dataManager.deleteMember(this.memberToRemove.id);
                         this.showToast(`${this.memberToRemove.name} foi removido da lista`, 'success');
-                        this.navigationManager.updateMembrosData();
-                        this.navigationManager.updateHomeData();
                     }
                     document.getElementById('confirmModal').classList.remove('open');
-                });
-
-                // Fechar modal clicando fora
-                document.getElementById('confirmModal').addEventListener('click', (e) => {
-                    if (e.target.id === 'confirmModal') {
-                        document.getElementById('confirmModal').classList.remove('open');
-                    }
                 });
             }
 
             setCurrentDate() {
                 const now = new Date();
-                const currentMonth = now.getMonth() + 1;
-                const currentYear = now.getFullYear();
                 const currentDate = now.toISOString().split('T')[0];
-
-                document.getElementById('transactionMonth').value = currentMonth;
-                document.getElementById('transactionYear').value = currentYear;
                 document.getElementById('transactionDate').value = currentDate;
-
-                document.getElementById('membersMonth').value = currentMonth;
-                document.getElementById('membersYear').value = currentYear;
-
-                document.getElementById('contabilidadeYear').value = currentYear;
             }
 
-            handleTransactionForm() {
+            async handleTransactionForm() {
                 const form = document.getElementById('transactionForm');
-                const formData = new FormData(form);
-
                 const type = document.getElementById('transactionType').value;
                 const description = document.getElementById('transactionDescription').value;
                 const amount = parseFloat(document.getElementById('transactionAmount').value);
-                const month = parseInt(document.getElementById('transactionMonth').value);
-                const year = parseInt(document.getElementById('transactionYear').value);
                 const date = document.getElementById('transactionDate').value;
+                const memberId = document.getElementById('memberSelect').value || null;
 
-                if (!description || !amount) {
+                if (!description || !amount || isNaN(amount)) {
                     this.showToast('Preencha todos os campos obrigatórios', 'error');
                     return;
                 }
 
-                this.dataManager.addTransaction({
+                await this.dataManager.addTransaction({
                     type,
                     description,
                     amount,
-                    month,
-                    year,
-                    date
+                    date,
+                    member: memberId
                 });
 
-                this.showToast(`${type === 'entrada' ? 'Entrada' : 'Saída'} registrada com sucesso!`, 'success');
-
-                // Limpar campos
-                document.getElementById('transactionDescription').value = '';
-                document.getElementById('transactionAmount').value = '';
-
-                // Atualizar dados
-                this.navigationManager.updateTesourariaData();
-                this.navigationManager.updateHomeData();
+                this.showToast(`${type === 'entrada' ? 'Entrada' : 'Saída'} registrada com sucesso!`);
+                form.reset();
+                this.setCurrentDate();
             }
 
-            handleMemberForm() {
+            async handleMemberForm() {
                 const name = document.getElementById('memberName').value.trim();
 
                 if (!name) {
@@ -1659,72 +1031,35 @@
                     return;
                 }
 
-                if (this.dataManager.members.some(m => m.name.toLowerCase() === name.toLowerCase())) {
+                const memberId = await this.dataManager.addMember(name);
+                
+                if (memberId) {
+                    this.showToast('Membro adicionado com sucesso!');
+                    document.getElementById('memberName').value = '';
+                } else {
                     this.showToast('Já existe um membro com este nome', 'error');
-                    return;
                 }
-
-                this.dataManager.addMember(name);
-                this.showToast('Membro adicionado com sucesso!', 'success');
-
-                // Limpar campo
-                document.getElementById('memberName').value = '';
-
-                // Atualizar dados
-                this.navigationManager.updateMembrosData();
-                this.navigationManager.updateHomeData();
             }
 
             updateMemberValue(memberId, type, yearMonth, value) {
-                const numValue = parseFloat(value) || 0;
-                this.dataManager.updateMemberValue(memberId, type, yearMonth, numValue);
-                this.navigationManager.updateMembrosData();
-                this.navigationManager.updateHomeData();
+                this.dataManager.updateMemberValue(memberId, type, yearMonth, value);
             }
 
             confirmRemoveMember(memberId, memberName) {
                 this.memberToRemove = { id: memberId, name: memberName };
-                document.getElementById('confirmText').innerHTML = 
-                    `Tem certeza que deseja remover <strong>${memberName}</strong> da lista de membros? 
-                     Esta ação não pode ser desfeita e todos os dados históricos serão perdidos.`;
+                document.getElementById('confirmText').innerHTML =
+                    `Tem certeza que deseja remover <strong>${memberName}</strong> da lista de membros?
+                     Esta ação é permanente.`;
                 document.getElementById('confirmModal').classList.add('open');
             }
 
-            showToast(message, type = 'info') {
-                // Criar elemento de toast
+            showToast(message, type = 'success') {
                 const toast = document.createElement('div');
-                toast.className = `toast toast-${type}`;
-                toast.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: ${type === 'error' ? '#ef4444' : '#22c55e'};
-                    color: white;
-                    padding: 12px 20px;
-                    border-radius: 8px;
-                    font-weight: 500;
-                    z-index: 1000;
-                    animation: slideIn 0.3s ease-out;
-                `;
+                toast.className = `toast ${type === 'error' ? 'toast-error' : ''}`;
                 toast.textContent = message;
-
-                // Adicionar animação CSS
-                const style = document.createElement('style');
-                style.textContent = `
-                    @keyframes slideIn {
-                        from { transform: translateX(100%); opacity: 0; }
-                        to { transform: translateX(0); opacity: 1; }
-                    }
-                    @keyframes slideOut {
-                        from { transform: translateX(0); opacity: 1; }
-                        to { transform: translateX(100%); opacity: 0; }
-                    }
-                `;
-                document.head.appendChild(style);
 
                 document.body.appendChild(toast);
 
-                // Remover após 3 segundos
                 setTimeout(() => {
                     toast.style.animation = 'slideOut 0.3s ease-out';
                     setTimeout(() => {
@@ -1738,10 +1073,7 @@
 
         // Inicializar aplicação
         const app = new FinanceApp();
-
-        // Expor funções globais necessárias
-        window.app = app;
     </script>
-</body>
 
+</body>
 </html>
